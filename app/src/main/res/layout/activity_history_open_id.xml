@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/input"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="left|center_vertical"
+            android:hint="input target open id"
+            android:textColor="#000000"
+            android:textColorHint="#4d000000"
+            android:textSize="20dp" />
+
+        <Button
+            android:id="@+id/add_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="添加" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/openids"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:layout_weight="1"
+        android:gravity="left|top"
+        android:lineSpacingMultiplier="1.3"
+        android:textSize="17dp" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/choose_input"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="left|center_vertical"
+            android:hint="输入要选择的序号"
+            android:textColor="#000000"
+            android:textColorHint="#4d000000"
+            android:inputType="number"
+            android:textSize="20dp" />
+
+        <Button
+            android:id="@+id/choose_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="选择" />
+
+    </LinearLayout>
+
+</LinearLayout>

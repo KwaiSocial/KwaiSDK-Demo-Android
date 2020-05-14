@@ -1,0 +1,7 @@
+<resources>
+  <string name="app_name">OpenSdkDemo</string>
+
+  <string name="social">社交</string>
+  <string name="post">生产</string>
+  <string name="signature">签名</string>
+</resources>

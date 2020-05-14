@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <string-array name="pic_share_page">
+    <item>编辑页</item>
+    <item>发布页</item>
+  </string-array>
+
+  <string-array name="video_share_page">
+    <item>裁剪页</item>
+    <item>编辑页</item>
+    <item>发布页</item>
+  </string-array>
+
+  <string-array name="share_page_name">
+    <item>本app</item>
+    <item>快影</item>
+    <item>一甜</item>
+  </string-array>
+
+</resources>
