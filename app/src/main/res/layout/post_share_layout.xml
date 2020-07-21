@@ -237,6 +237,12 @@
           android:text="发布多段视频" />
 
         <Button
+          android:id="@+id/publish_ai_cut_video"
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          android:text="发布智能裁剪视频" />
+
+        <Button
           android:id="@+id/multi_video_clear"
           android:layout_width="200dp"
           android:layout_height="wrap_content"

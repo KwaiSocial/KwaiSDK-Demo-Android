@@ -1,7 +1,5 @@
 package com.kwai.opensdk.demo;
 
-import java.security.MessageDigest;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -15,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.security.MessageDigest;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

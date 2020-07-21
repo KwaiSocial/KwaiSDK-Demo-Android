@@ -20,6 +20,10 @@ android {
                 v2SigningEnabled false //禁用v2签名增强模式
             }
         }
+
+        manifestPlaceholders = [
+                "KWAI_APP_ID": "ks703687443040312600", // 申请的appId
+        ]
     }
     buildTypes {
         debug {
@@ -34,6 +38,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+
+
     useLibrary 'org.apache.http.legacy'
 
     buildTypes {
@@ -53,5 +60,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.4.9'
-    implementation 'com.github.kwaisocial:kwai-opensdk-withauth:2.1.0'
+    implementation 'com.github.kwaisocial:kwai-opensdk-withauth:2.3.0'
 }

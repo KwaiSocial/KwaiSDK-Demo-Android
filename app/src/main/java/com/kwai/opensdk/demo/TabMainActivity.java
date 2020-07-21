@@ -1,8 +1,5 @@
 package com.kwai.opensdk.demo;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -10,6 +7,9 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -54,7 +54,7 @@ public class TabMainActivity extends FragmentActivity {
     screenWidth = outMetrics.widthPixels;
 
     LinearLayout.LayoutParams lp =
-        (android.widget.LinearLayout.LayoutParams) mTabLine.getLayoutParams();
+        (LinearLayout.LayoutParams) mTabLine.getLayoutParams();
     lp.width = screenWidth / 3;
     mTabLine.setLayoutParams(lp);
   }
@@ -108,7 +108,7 @@ public class TabMainActivity extends FragmentActivity {
 
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
       LinearLayout.LayoutParams lp =
-          (android.widget.LinearLayout.LayoutParams) mTabLine.getLayoutParams();
+          (LinearLayout.LayoutParams) mTabLine.getLayoutParams();
       lp.leftMargin = (int) ((positionOffset + position) * screenWidth / 3);
       mTabLine.setLayoutParams(lp);
     }

@@ -14,15 +14,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.kwai.opensdk.sdk.constants.KwaiOpenSdkCmdEnum;
 import com.kwai.opensdk.sdk.constants.KwaiOpenSdkConstants;
+import com.kwai.opensdk.sdk.model.postshare.AICutMedias;
 import com.kwai.opensdk.sdk.model.postshare.MultiMediaClip;
 import com.kwai.opensdk.sdk.model.postshare.PostShareMediaInfo;
 import com.kwai.opensdk.sdk.model.postshare.SinglePictureEdit;
@@ -31,7 +30,7 @@ import com.kwai.opensdk.sdk.model.postshare.SingleVideoClip;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoEdit;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoPublish;
 import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
-import com.kwai.opensdk.sdk.openapi.KwaiOpenAPIFactory;
+import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.kwai.opensdk.sdk.utils.VerifyAppUtil;
 import com.luck.picture.lib.PictureSelector;
@@ -43,8 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.fragment.app.Fragment;
-
-import static com.kwai.opensdk.demo.AppInfoEnum.SOCIAL_SHARE_FT;
 
 public class PostShareFragment extends Fragment {
   private static final String TAG = "PostShareFragment";
@@ -67,6 +64,7 @@ public class PostShareFragment extends Fragment {
   private TextView mMultiVideoPath;
   private View multiSelectVideo;
   private View mPublishMultiVideo;
+  private View mPublishAICutVideo;
   private Spinner mSpinnerSharePage;
   private Spinner mPicSpinnerSharePage;
   private Spinner mPackageSpinner;
@@ -101,6 +99,7 @@ public class PostShareFragment extends Fragment {
     mMultiVideoPath = view.findViewById(R.id.multi_video_path);
     multiSelectVideo = view.findViewById(R.id.multi_select_video);
     mPublishMultiVideo = view.findViewById(R.id.publish_multi_video);
+    mPublishAICutVideo = view.findViewById(R.id.publish_ai_cut_video);
     mTagClear = view.findViewById(R.id.tag_clear);
     mMultiVideoClear = view.findViewById(R.id.multi_video_clear);
     mMultiSelectPic = view.findViewById(R.id.multi_select_pic);
@@ -235,6 +234,14 @@ public class PostShareFragment extends Fragment {
       }
     });
 
+    //发布智能剪辑视频
+    mPublishAICutVideo.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        aiCutMedias(mMultiVideos);
+      }
+    });
+
     //清除所有多段视频
     mMultiVideoClear.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -245,7 +252,7 @@ public class PostShareFragment extends Fragment {
     });
 
 
-    mKwaiOpenAPI = KwaiOpenAPIFactory.createKwaiOpenAPI(getContext(), "ks651051625375991924");
+    mKwaiOpenAPI = new KwaiOpenAPI(getContext());
     // 使用sdk的loading界面，设置false第三方应用可以自定义实现loading
     mKwaiOpenAPI.setShowDefaultLoading(false);
     // 使用sdk的loading界面，设置true则自动跳转应用市场下载
@@ -304,7 +311,11 @@ public class PostShareFragment extends Fragment {
         List<LocalMedia> selectList = PictureSelector.obtainMultipleResult(data);
         if (selectList != null) {
           for (LocalMedia item : selectList) {
-            mMultiVideos.add(item.getPath());
+            String path = item.getRealPath();
+            if (TextUtils.isEmpty(path)) {
+              path = item.getPath();
+            }
+            mMultiVideos.add(path);
           }
         }
         mMultiVideoPath.setText("已选视频或图片数量:" + mMultiVideos.size());
@@ -511,6 +522,25 @@ public class PostShareFragment extends Fragment {
     MultiMediaClip.Req req = new MultiMediaClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "MultiMediaClip";
+
+    req.mediaInfo = new PostShareMediaInfo();
+    req.mediaInfo.mMultiMediaAssets = multiMedia;
+
+    if (!TextUtils.isEmpty(mTagList.getText().toString())) {
+      req.mediaInfo.mTag = mTagList.getText().toString();
+    }
+    req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
+    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    }
+    mKwaiOpenAPI.sendReq(req, getActivity());
+  }
+
+  //aiCutMedias
+  public void aiCutMedias(ArrayList<String> multiMedia) {
+    AICutMedias.Req req = new AICutMedias.Req();
+    req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
+    req.transaction = "AICutMedias";
 
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;
