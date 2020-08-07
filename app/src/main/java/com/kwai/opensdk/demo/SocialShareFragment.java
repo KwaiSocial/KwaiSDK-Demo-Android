@@ -248,7 +248,7 @@ public class SocialShareFragment extends Fragment {
     };
 
     mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.SCOPE, Config.STATE,
-        kwaiAuthListener, new String[]{KwaiConstants.Platform.KWAI_APP});
+        kwaiAuthListener, platformList.toArray(new String[platformList.size()]));
   }
 
   // 通过选择人或者群组分享私信
