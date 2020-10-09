@@ -20,7 +20,7 @@
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.3.0"  
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.5.4"  
 }
 ```
 

@@ -137,6 +137,10 @@ public class SocialShareFragment extends Fragment {
       }
     });
     mKwaiOpenAPI = new KwaiOpenAPI(getContext());
+    //test
+    if (MockHelper.isTest) {
+      mKwaiOpenAPI = new MockHelper.KwaiOpenAPITest(getContext());
+    }
     mKwaiOpenSdkAuth = new KwaiOpenSdkAuth();
     // 使用sdk的loading界面，设置false第三方应用可以自定义实现loading
     mKwaiOpenAPI.setShowDefaultLoading(true);
@@ -178,7 +182,13 @@ public class SocialShareFragment extends Fragment {
 
   // 获取openId的网络请求，为了安全性，建议放在第三方客户端的服务器中，由第三方服务器实现这个请求接口后将openid返回第三方客户端
   private String getOpenIdByNetwork(final String code) {
-    String url = getRequestOpenIdUrl("code", APP_ID, APP_SECRET, code);
+    String appId = APP_ID;
+    String appSecret = APP_SECRET;
+    if (MockHelper.isTest) {
+      appId = MockHelper.mAppIdTest;
+      appSecret = MockHelper.mAppSecretTest;
+    }
+    String url = getRequestOpenIdUrl("code", appId, appSecret, code);
     String result = NetworkUtil.get(url, null, null);
     String openId = null;
     try {

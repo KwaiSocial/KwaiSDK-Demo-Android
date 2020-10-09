@@ -2,7 +2,6 @@ package com.kwai.opensdk.demo;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -20,7 +19,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.kwai.opensdk.sdk.constants.KwaiOpenSdkCmdEnum;
-import com.kwai.opensdk.sdk.constants.KwaiOpenSdkConstants;
 import com.kwai.opensdk.sdk.model.postshare.AICutMedias;
 import com.kwai.opensdk.sdk.model.postshare.MultiMediaClip;
 import com.kwai.opensdk.sdk.model.postshare.PostShareMediaInfo;
@@ -32,14 +30,15 @@ import com.kwai.opensdk.sdk.model.postshare.SingleVideoPublish;
 import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
-import com.kwai.opensdk.sdk.utils.VerifyAppUtil;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.fragment.app.Fragment;
 
@@ -51,8 +50,6 @@ public class PostShareFragment extends Fragment {
   private static final int REQUEST_CODE_SINGLE_VIDEO = 12;
   private static final int REQUEST_CODE_MULTI_VIDEO = 13;
 
-  private TextView mSdkInfoTv;
-  private View mShowOptionData;
   private View mTagInput;
   private TextView mTagList;
   private View mSelectPic;
@@ -67,10 +64,11 @@ public class PostShareFragment extends Fragment {
   private View mPublishAICutVideo;
   private Spinner mSpinnerSharePage;
   private Spinner mPicSpinnerSharePage;
-  private Spinner mPackageSpinner;
   private View mTagClear;
   private View mMultiVideoClear;
-  private EditText mExtraEdit;
+  private EditText mExtraInfoEdit;
+  private EditText mMediaMapEdit;
+  private EditText mThirdExtraEdit;
   private CheckBox mDisableFallBack;
   private View mMultiSelectPic;
   private TextView mCallbackTv;
@@ -86,9 +84,7 @@ public class PostShareFragment extends Fragment {
     super.onCreate(savedInstanceState);
     View view = inflater.inflate(R.layout.post_share_layout, container, false);
     mSpinnerSharePage = view.findViewById(R.id.spinner_share_page);
-    mSdkInfoTv = view.findViewById(R.id.sdk_info);
     mSelectPic = view.findViewById(R.id.select_pic);
-    mShowOptionData = view.findViewById(R.id.show_option_data);
     mTagInput = view.findViewById(R.id.tag_input);
     mTagList = view.findViewById(R.id.tag_list);
     mPicPath = view.findViewById(R.id.pic_path);
@@ -104,31 +100,12 @@ public class PostShareFragment extends Fragment {
     mMultiVideoClear = view.findViewById(R.id.multi_video_clear);
     mMultiSelectPic = view.findViewById(R.id.multi_select_pic);
     mPicSpinnerSharePage = view.findViewById(R.id.picSpinnerSharePage);
-    mExtraEdit = view.findViewById(R.id.user_info);
+    mExtraInfoEdit = view.findViewById(R.id.extra_info);
+    mMediaMapEdit = view.findViewById(R.id.media_map_info);
+    mThirdExtraEdit = view.findViewById(R.id.third_app_info);
     mDisableFallBack = view.findViewById(R.id.disableFallBack);
-    mPackageSpinner = view.findViewById(R.id.spinner_package);
     mCallbackTv = view.findViewById(R.id.callback_tips);
-
-    mExtraEdit.setFocusable(true);
-
-    //基本信息
-    mSdkInfoTv.setText("open sdk version:" + KwaiOpenSdkConstants.SDK_VERSION + "\n" +
-      "快手是否安装:" + VerifyAppUtil.isKwaiAppInstalled(getContext()));
-
-    //查看配置信息
-    mShowOptionData.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        new AlertDialog.Builder(getContext())
-          .setMessage(queryShareAuth(getContext()))
-          .setNegativeButton("关闭", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-              dialog.dismiss();
-            }
-          }).create().show();
-      }
-    });
+    mExtraInfoEdit.setFocusable(true);
 
     //添加标签 tag
     mTagInput.setOnClickListener(new View.OnClickListener() {
@@ -210,8 +187,9 @@ public class PostShareFragment extends Fragment {
       public void onClick(View v) {
         mIsSelectePicIng = true;
         PictureSelector.create(PostShareFragment.this)
-          .openGallery(PictureMimeType.ofVideo())
-          .forResult(REQUEST_CODE_MULTI_VIDEO);
+            .openGallery(PictureMimeType.ofVideo())
+            .imageEngine(GlideEngine.createGlideEngine())
+            .forResult(REQUEST_CODE_MULTI_VIDEO);
       }
     });
 
@@ -221,8 +199,9 @@ public class PostShareFragment extends Fragment {
       public void onClick(View v) {
         mIsSelectePicIng = true;
         PictureSelector.create(PostShareFragment.this)
-          .openGallery(PictureMimeType.ofImage())
-          .forResult(REQUEST_CODE_MULTI_VIDEO);
+            .openGallery(PictureMimeType.ofImage())
+            .imageEngine(GlideEngine.createGlideEngine())
+            .forResult(REQUEST_CODE_MULTI_VIDEO);
       }
     });
 
@@ -253,10 +232,15 @@ public class PostShareFragment extends Fragment {
 
 
     mKwaiOpenAPI = new KwaiOpenAPI(getContext());
+    //test
+    if (MockHelper.isTest) {
+      mKwaiOpenAPI = new MockHelper.KwaiOpenAPITest(getContext());
+    }
     // 使用sdk的loading界面，设置false第三方应用可以自定义实现loading
     mKwaiOpenAPI.setShowDefaultLoading(false);
-    // 使用sdk的loading界面，设置true则自动跳转应用市场下载
+    // 设置是否自动跳转应用市场，设置true则自动跳转应用市场下载
     mKwaiOpenAPI.setAutoGotoMarket(true, true);
+    mKwaiOpenAPI.setNewTaskFlag(true);
     registerListener();
     // sdk的log设置
     LogUtil.setLogLevel(LogUtil.LOG_LEVEL_ALL);
@@ -329,21 +313,6 @@ public class PostShareFragment extends Fragment {
     mKwaiOpenAPI.removeKwaiAPIEventListerer();
   }
 
-  public String getPackageName(String defaultName) {
-    //低版本没有mock 的必要
-    if (mIsSelectePicIng || !VerifyAppUtil.validateKwaiApp(getContext())) {
-      return defaultName;
-    }
-    if (mPackageSpinner != null) {
-      if (mPackageSpinner.getSelectedItemPosition() == 1) {
-        return "com.kwai.videoeditor";
-      } else if (mPackageSpinner.getSelectedItemPosition() == 2) {
-        return "com.kwai.m2u";
-      }
-    }
-    return defaultName;
-  }
-
   private String parseFilePath(Activity activity, Uri uri) {
     String[] filePathColumn = {MediaStore.Images.Media.DATA};
     Cursor cursor = null;
@@ -361,37 +330,6 @@ public class PostShareFragment extends Fragment {
       }
     }
     return picturePath;
-  }
-
-  //获取主app配置信息
-  private String queryShareAuth(Context context) {
-    if (context == null) {
-      return null;
-    }
-    // 读取content provider之前确认是我们的app
-    if (!VerifyAppUtil.isKwaiAppInstalled(context)) {
-      return null;
-    }
-    String authConfig = "";
-    try {
-      Uri uri = Uri.parse("content://com.yxcorp.gifshow.ShareAuthProvider/data?appId=" + context.getPackageName());
-      Cursor cursor = context.getContentResolver().query(uri, new String[]{"thirdPartyConfig"}, null, null, null);
-      if (cursor != null) {
-        try {
-          if (cursor.moveToNext()) {
-            authConfig = cursor.getString(cursor.getColumnIndex("thirdPartyConfig"));
-          }
-        } finally {
-          try {
-            cursor.close();
-          } catch (Throwable e) {
-
-          }
-        }
-      }
-    } catch (Throwable e) {
-    }
-    return authConfig;
   }
 
   private KwaiOpenSdkCmdEnum getPicShareCmd(int position) {
@@ -426,8 +364,15 @@ public class PostShareFragment extends Fragment {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -446,8 +391,15 @@ public class PostShareFragment extends Fragment {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -469,8 +421,15 @@ public class PostShareFragment extends Fragment {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -490,8 +449,15 @@ public class PostShareFragment extends Fragment {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -511,8 +477,15 @@ public class PostShareFragment extends Fragment {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -530,8 +503,15 @@ public class PostShareFragment extends Fragment {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -549,8 +529,15 @@ public class PostShareFragment extends Fragment {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -569,5 +556,24 @@ public class PostShareFragment extends Fragment {
         mCallbackTv.setText("CallBackResult: resp is null");
       }
     });
+  }
+
+  private Map<String, Object> getMediaMap() {
+    HashMap<String, Object> mediaMap = new HashMap<>();
+    String value = mMediaMapEdit.getText().toString();
+    try {
+      if (!TextUtils.isEmpty(value)) {
+        String[] mapValues = value.split(";");
+        for (String result : mapValues) {
+          String[] resultValues = result.split(":");
+          if (resultValues != null && resultValues.length >= 2) {
+            mediaMap.put(resultValues[0], resultValues[1]);
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return mediaMap;
   }
 }

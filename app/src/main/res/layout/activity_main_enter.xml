@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <TextView
+    android:id="@+id/sdk_info"
+    android:layout_marginTop="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    android:gravity="center" />
+
+  <TextView
+    android:id="@+id/mock_app"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="60dp"
+    android:text="请输入应用配置,关闭则使用demo默认配置"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="@+id/switch_btn"
+    app:layout_constraintTop_toTopOf="@+id/sdk_info" />
+
+  <Switch
+    android:id="@+id/switch_btn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:switchMinWidth="56dp"
+    android:layout_marginLeft="15dp"
+    app:layout_constraintBaseline_toBaselineOf="@+id/mock_app"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintLeft_toRightOf="@+id/mock_app"
+    app:layout_constraintStart_toEndOf="@+id/mock_app"
+    android:textOff="OFF"
+    android:textOn ="ON"/>
+
+  <EditText
+    android:id="@+id/app_id"
+    android:layout_width="300dp"
+    android:layout_height="40dp"
+    android:layout_marginLeft="12dp"
+    android:layout_marginRight="12dp"
+    android:layout_marginTop="20dp"
+    android:hint="appId"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/mock_app" />
+
+  <EditText
+    android:id="@+id/app_name"
+    android:layout_width="300dp"
+    android:layout_height="40dp"
+    android:layout_marginLeft="12dp"
+    android:layout_marginRight="12dp"
+    android:layout_marginTop="20dp"
+    android:hint="appName"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/app_id" />
+
+  <EditText
+    android:id="@+id/app_package_name"
+    android:layout_width="300dp"
+    android:layout_height="40dp"
+    android:layout_marginLeft="12dp"
+    android:layout_marginRight="12dp"
+    android:layout_marginTop="20dp"
+    android:hint="appPackageName"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/app_name" />
+
+  <EditText
+    android:id="@+id/app_secret"
+    android:layout_width="300dp"
+    android:layout_height="40dp"
+    android:layout_marginLeft="12dp"
+    android:layout_marginRight="12dp"
+    android:layout_marginTop="20dp"
+    android:hint="appSecret"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/app_package_name" />
+
+  <Button
+    android:id="@+id/enter_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="20dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginRight="8dp"
+    android:text="Enter Demo"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/app_secret"/>
+
+  <TextView
+    android:id="@+id/notify_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginTop="20dp"
+    android:visibility="gone"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/enter_button" />
+
+  <TextView
+    android:id="@+id/notification"
+    android:layout_marginTop="40dp"
+    android:layout_width="350dp"
+    android:layout_height="wrap_content"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/notify_text"
+    android:gravity="center"
+    android:textColor="#FF2D2D"
+    android:text="备注：mock应用配置后，快手App回调Callback将会失效，
+    若调试回调可请修改demo中build.gradle中的applicationId为测试包名，再进行代码编译调试！"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

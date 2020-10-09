@@ -132,5 +132,4 @@ public class GenSignatureFragment extends Fragment {
     }
     return new String(buff, 0, len * 2);
   }
-
 }

@@ -38,7 +38,7 @@ public class TabMainActivity extends FragmentActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_NO_TITLE);
-    setContentView(R.layout.activity_main);
+    setContentView(R.layout.activity_main_tab);
     initView();
     mViewPager = findViewById(R.id.id_viewpager);
     mAdapter = new FragmentAdapter(getSupportFragmentManager(), fragments);
@@ -128,13 +128,4 @@ public class TabMainActivity extends FragmentActivity {
       }
     }
   }
-
-  @Override
-  public String getPackageName() {
-    if (mViewPager!= null && mViewPager.getCurrentItem() == 1 && mPostFragment != null) {
-      return mPostFragment.getPackageName(super.getPackageName());
-    }
-    return super.getPackageName();
-  }
-
 }

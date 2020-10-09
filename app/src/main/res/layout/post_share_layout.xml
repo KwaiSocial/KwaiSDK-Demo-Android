@@ -4,7 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:orientation="vertical"
-  tools:context=".PostShareFragment">
+  tools:context="com.kwai.opensdk.demo.PostShareFragment">
 
   <ScrollView
     android:layout_width="match_parent"
@@ -15,42 +15,10 @@
       android:layout_height="match_parent"
       android:orientation="vertical">
 
-      <TextView
-        android:id="@+id/sdk_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center" />
-
-      <Button
-        android:id="@+id/show_option_data"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="查看配置信息" />
-
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal">
-
-        <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="1.    mock app"></TextView>
-
-        <Spinner
-          android:id="@+id/spinner_package"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:entries="@array/share_page_name" />
-
-      </LinearLayout>
-
-      <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -81,16 +49,37 @@
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
+        <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal"
+          android:layout_marginTop="10dp"
+          android:text="2.   额外参数配置，根据业务可选" />
+
         <EditText
-          android:id="@+id/user_info"
+          android:id="@+id/extra_info"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:gravity="center"
-          android:hint="2.   输入透传的额外参数extraInfo" />
+          android:hint="(1)输入透传的额外参数extraInfo" />
 
+        <EditText
+          android:id="@+id/media_map_info"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:hint="(2)业务参数mediaInfoMap（传入格式key1:value1;key2:value2）" />
+
+        <EditText
+          android:id="@+id/third_app_info"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:hint="(3)第三方埋点数据额外参数thirdExtraInfo" />
       </LinearLayout>
 
       <CheckBox
