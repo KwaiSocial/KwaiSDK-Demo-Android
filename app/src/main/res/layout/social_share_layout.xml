@@ -6,20 +6,33 @@
     android:layout_height="match_parent"
     tools:context=".SocialShareFragment">
 
-    <Button
-        android:id="@+id/login_app_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="app登录快手"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+      android:id="@+id/app_login_layout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      android:orientation="horizontal"
+      android:gravity="center_vertical"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.498"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+          android:id="@+id/login_app_btn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="20dp"
+          android:text="app登录快手" />
+
+        <Button
+          android:id="@+id/login_h5_btn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="20dp"
+          android:text="h5登录快手" />
+
+    </LinearLayout>
 
     <LinearLayout
       android:id="@+id/login_layout"
@@ -31,7 +44,7 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintHorizontal_bias="0.498"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/login_app_btn">
+      app:layout_constraintTop_toBottomOf="@+id/app_login_layout">
 
         <CheckBox
           android:id="@+id/kwai_app_checkbox"

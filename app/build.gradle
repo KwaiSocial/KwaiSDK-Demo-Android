@@ -23,6 +23,7 @@ android {
 
         manifestPlaceholders = [
                 "KWAI_APP_ID": "ks703687443040312600", // 申请的appId
+                "KWAI_SCOPE" : "user_info", // 需要申请的scope权限，如：user_info(用户基本信息), user_phone(电话号码)，relation(关系链信息)等
         ]
     }
     buildTypes {
@@ -39,11 +40,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-
-
     useLibrary 'org.apache.http.legacy'
 
     buildTypes {
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -61,5 +61,5 @@ dependencies {
 
     implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.5.9'
     implementation "com.github.bumptech.glide:glide:4.11.0"
-    implementation 'com.github.kwaisocial:kwai-opensdk-withauth:2.5.4'
+    implementation 'com.github.kwaisocial:kwai-opensdk-withauth:2.6.0'
 }

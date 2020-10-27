@@ -9,21 +9,23 @@
 
 # 二、项目地址库
 
-外网访问git库：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
+准备工作
+开发者需要在快手开放平台完成注册，新建一个网站应用，并获取应用标识appId 和 appSecret，详细参考申请注册流程，官网地址：https://open.kuaishou.com/platform
+
+git库地址：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
 
 # 三、第三方接入说明
-## 1、接入aar
+## 1、接入aar（AAR Latest Version 2.6.0）
 
 - 版本要求  minsdkversion:19
 
-- 快手外网引用aar：外网版本仅提供带auth认证的aar
+- 快手外网引用aar
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.5.4"  
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.6.0" 
 }
 ```
-
 - 混淆配置
 ```
 -keep class com.kwai.opensdk.sdk.** {*;}
@@ -38,7 +40,8 @@ android {
     defaultConfig {
         applicationId "com.kwai.chat.demo" // 接入方的包名
         manifestPlaceholders = [
-            "KWAI_APP_ID": "ks703687443040312600" // 申请的appId
+            "KWAI_APP_ID": "ks703687443040312600", // 申请分配的appId
+            "KWAI_SCOPE" : "user_info" // 需要申请的scope权限，多个scope可以使用","分割，代表需要用户授权什么能力
         ]
     }
 }
@@ -60,55 +63,55 @@ public class MyApplication extends Application {
 
 ```
 private IKwaiOpenSdkAuth mKwaiOpenSdkAuth = new KwaiOpenSdkAuth(); // 初始化
-  // 设置授权结果监听
-  IKwaiAuthListener kwaiAuthListener = new IKwaiAuthListener() {
-      @Override
-      public void onSuccess(InternalResponse response) {
-        new Thread(new Runnable() {
-          public void run() {
-            String result = null;
-            int retry = 0;
-            while (null == result && retry < NETWORK_MAX_RETRY_TIMES) {
-              result = getOpenIdByNetwork(response.getCode());
-              retry++;
-              LogUtil.i(TAG, "retry=" + retry);
-            }
-            final String openId = result;
-            Handler mainHandler = new Handler(Looper.getMainLooper());
-            mainHandler.post(new Runnable() {
-              @Override
-              public void run() {
-                mOpenId = openId;
-                if (TextUtils.isEmpty(mOpenId)) {
-                  mOpenIdTv.setText("当前openId:" + "get openId error");
-                } else {
-                  mOpenIdTv.setText("当前openId:" + mOpenId);
-                }
-              }
-            });
+// 设置授权结果监听
+IKwaiAuthListener kwaiAuthListener = new IKwaiAuthListener() {
+    @Override
+    public void onSuccess(InternalResponse response) {
+      new Thread(new Runnable() {
+        public void run() {
+          String result = null;
+          int retry = 0;
+          while (null == result && retry < NETWORK_MAX_RETRY_TIMES) {
+            result = getOpenIdByNetwork(response.getCode());
+            retry++;
+            LogUtil.i(TAG, "retry=" + retry);
           }
-        }).start();
-      }
+          final String openId = result;
+          Handler mainHandler = new Handler(Looper.getMainLooper());
+          mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+              mOpenId = openId;
+              if (TextUtils.isEmpty(mOpenId)) {
+                mOpenIdTv.setText("当前openId:" + "get openId error");
+              } else {
+                mOpenIdTv.setText("当前openId:" + mOpenId);
+              }
+            }
+          });
+        }
+      }).start();
+    }
 
-      @Override
-      public void onFailed(String state, int errCode, String errMsg) {
-        mOpenIdTv.setText("code error is " + errCode + " and msg is " + errMsg);
-      }
+    @Override
+    public void onFailed(String state, int errCode, String errMsg) {
+      mOpenIdTv.setText("code error is " + errCode + " and msg is " + errMsg);
+    }
 
-      @Override
-      public void onCancel() {
-        mOpenIdTv.setText("login is canceled");
-      }
-    };
-    
+    @Override
+    public void onCancel() {
+      mOpenIdTv.setText("login is canceled");
+    }
+  };
+}
+// STATE安全参数，标识和用户或者设备相关的授权请求。建议开发者实现
+// KwaiConstants.LoginType.APP通过快手App登录授权，KwaiConstants.LoginType.H5通过H5页面登录授权
 // 请求授权，支持两个平台KwaiConstants.Platform.KWAI_APP（快手主站）、KwaiConstants.Platform.NEBULA_APP（快手极速版），未设置的默认通过快手主站授权
-// 支持的 Scope 列表: user_info(用户基本信息), user_phone(电话号码)，relation(关系链信息)
-// state可选的透传参数
-   mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.SCOPE, Config.STATE,
-        kwaiAuthListener, new String[]{KwaiConstants.Platform.KWAI_APP， 
-        KwaiConstants.Platform.NEBULA_APP});
+  mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.STATE,
+    KwaiConstants.LoginType.APP,kwaiAuthListener, new String[]
+      {KwaiConstants.Platform.KWAI_APP，KwaiConstants.Platform.NEBULA_APP});
 
-  // 服务器使用接口，获取openId的网络请求，为了安全性，建议放在第三方客户端的服务器中，由接入方服务器实现这个请求接口后将openid返回接入方方客户端
+  // 服务器使用接口，获取openId的网络请求，为了安全性，建议放在第三方客户端的服务器中，由接入方服务器实现这个请求接口后将openid返回接入方的客户端
   private String getOpenIdByNetwork(final String code) {
     String url = getRequestOpenIdUrl("code", APP_ID, APP_SECRET, code);
     String result = NetworkUtil.get(url, null, null);
@@ -184,7 +187,7 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 // 通过TargetOpenId分享私信给个人，openId是必须参数
   public void shareMessageToBuddy() {
     if (TextUtils.isEmpty(HistoryOpenIdActivity.sTargetOpenId)) {
-      Toast.makeText(getActivity(), "sTargetOpenId is null, 请先设置", 			 
+      Toast.makeText(getActivity(), "sTargetOpenId is null, 请先设置",
          Toast.LENGTH_SHORT).show();
       return;
     }
@@ -212,9 +215,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 ```
 // 打开TargetOpenId指向的个人主页
   public void showProfile() {
-    if (TextUtils.isEmpty(HistoryOpenIdActivity.sTargetOpenId) && getActivity() != 
+    if (TextUtils.isEmpty(HistoryOpenIdActivity.sTargetOpenId) && getActivity() !=
          null && !getActivity().isFinishing()) {
-      Toast.makeText(getActivity(), "sTargetOpenId is null, 请先设置", 
+      Toast.makeText(getActivity(), "sTargetOpenId is null, 请先设置",
          Toast.LENGTH_SHORT).show();
       return;
     }

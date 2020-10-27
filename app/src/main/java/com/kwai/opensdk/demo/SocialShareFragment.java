@@ -60,7 +60,7 @@ public class SocialShareFragment extends Fragment {
   private CheckBox mKwaiCheck;
   private CheckBox mNebulaCheck;
   private TextView mLoginPlatform;
-  private ArrayList<String> platformList = new ArrayList<>(2);
+  private final ArrayList<String> platformList = new ArrayList<>(2);
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,6 +71,8 @@ public class SocialShareFragment extends Fragment {
     mLoginPlatform = view.findViewById(R.id.login_platform);
 
     view.findViewById(R.id.login_app_btn).setOnClickListener(v -> appLogin());
+
+    view.findViewById(R.id.login_h5_btn).setOnClickListener(v -> h5Login());
 
     view.findViewById(R.id.share).setOnClickListener(v -> shareMessage());
 
@@ -151,7 +153,7 @@ public class SocialShareFragment extends Fragment {
   }
 
   private void refreshLoginText() {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     for (String platform : platformList) {
       buffer.append(platform);
       buffer.append(" ");
@@ -212,53 +214,60 @@ public class SocialShareFragment extends Fragment {
     builder.append("&code=" + code);
     return builder.toString();
   }
+  
+  final IKwaiAuthListener mKwaiAuthListener = new IKwaiAuthListener() {
 
+    @Override
+    public void onSuccess(InternalResponse response) {
+      new Thread(new Runnable() {
+        public void run() {
+          String result = null;
+          int retry = 0;
+          while (null == result && retry < NETWORK_MAX_RETRY_TIMES) {
+            result = getOpenIdByNetwork(response.getCode());
+            retry++;
+            LogUtil.i(TAG, "retry=" + retry);
+          }
+          final String openId = result;
+          Handler mainHandler = new Handler(Looper.getMainLooper());
+          mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+              mOpenId = openId;
+              if (TextUtils.isEmpty(mOpenId)) {
+                mOpenIdTv.setText("当前openId:" + "get openId error");
+              } else {
+                mOpenIdTv.setText("当前openId:" + mOpenId);
+              }
+            }
+          });
+        }
+      }).start();
+    }
+
+    @Override
+    public void onFailed(String state, int errCode, String errMsg) {
+      mOpenIdTv.setText("code error is " + errCode + " and msg is " + errMsg);
+    }
+
+    @Override
+    public void onCancel() {
+      mOpenIdTv.setText("login is canceled");
+    }
+  };
+  
   // app调起登录
   public void appLogin() {
-
-    IKwaiAuthListener kwaiAuthListener = new IKwaiAuthListener() {
-
-      @Override
-      public void onSuccess(InternalResponse response) {
-        new Thread(new Runnable() {
-          public void run() {
-            String result = null;
-            int retry = 0;
-            while (null == result && retry < NETWORK_MAX_RETRY_TIMES) {
-              result = getOpenIdByNetwork(response.getCode());
-              retry++;
-              LogUtil.i(TAG, "retry=" + retry);
-            }
-            final String openId = result;
-            Handler mainHandler = new Handler(Looper.getMainLooper());
-            mainHandler.post(new Runnable() {
-              @Override
-              public void run() {
-                mOpenId = openId;
-                if (TextUtils.isEmpty(mOpenId)) {
-                  mOpenIdTv.setText("当前openId:" + "get openId error");
-                } else {
-                  mOpenIdTv.setText("当前openId:" + mOpenId);
-                }
-              }
-            });
-          }
-        }).start();
-      }
-
-      @Override
-      public void onFailed(String state, int errCode, String errMsg) {
-        mOpenIdTv.setText("code error is " + errCode + " and msg is " + errMsg);
-      }
-
-      @Override
-      public void onCancel() {
-        mOpenIdTv.setText("login is canceled");
-      }
-    };
-
-    mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.SCOPE, Config.STATE,
-        kwaiAuthListener, platformList.toArray(new String[platformList.size()]));
+    mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.STATE,
+        KwaiConstants.LoginType.APP, mKwaiAuthListener,
+        platformList.toArray(new String[platformList.size()]));
+  }
+  
+  // h5调起登录
+  public void h5Login() {
+    mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.STATE,
+        KwaiConstants.LoginType.H5, mKwaiAuthListener,
+        platformList.toArray(new String[platformList.size()]));
   }
 
   // 通过选择人或者群组分享私信

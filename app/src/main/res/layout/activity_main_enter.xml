@@ -20,7 +20,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="60dp"
-    android:text="请输入应用配置,关闭则使用demo默认配置"
+    android:text="请输入应用配置,关闭则使用默认配置"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="@+id/switch_btn"
     app:layout_constraintTop_toTopOf="@+id/sdk_info" />
@@ -117,6 +117,6 @@
     android:gravity="center"
     android:textColor="#FF2D2D"
     android:text="备注：mock应用配置后，快手App回调Callback将会失效，
-    若调试回调可请修改demo中build.gradle中的applicationId为测试包名，再进行代码编译调试！"/>
+    若调试回调请修改demo中对应代码编译测试！"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
