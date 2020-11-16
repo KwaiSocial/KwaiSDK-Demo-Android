@@ -240,7 +240,6 @@ public class PostShareFragment extends Fragment {
     mKwaiOpenAPI.setShowDefaultLoading(false);
     // 设置是否自动跳转应用市场，设置true则自动跳转应用市场下载
     mKwaiOpenAPI.setAutoGotoMarket(true, true);
-    mKwaiOpenAPI.setNewTaskFlag(true);
     registerListener();
     // sdk的log设置
     LogUtil.setLogLevel(LogUtil.LOG_LEVEL_ALL);
