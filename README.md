@@ -15,7 +15,7 @@
 git库地址：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
 
 # 三、第三方接入说明
-## 1、接入aar（AAR Latest Version 2.6.0）
+## 1、接入aar（AAR Latest Version 2.7.0）
 
 - 版本要求  minsdkversion:19
 
@@ -23,7 +23,7 @@ git库地址：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.6.0" 
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.7.0" 
 }
 ```
 - 混淆配置
