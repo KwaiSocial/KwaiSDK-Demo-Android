@@ -12,24 +12,28 @@
 准备工作
 开发者需要在快手开放平台完成注册，新建一个网站应用，并获取应用标识appId 和 appSecret，详细参考申请注册流程，官网地址：https://open.kuaishou.com/platform
 
-git库地址：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
+访问git库：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
 
 # 三、第三方接入说明
-## 1、接入aar（AAR Latest Version 2.7.0）
+## 1、接入aar（AAR Latest Version 2.8.0）
 
 - 版本要求  minsdkversion:19
 
-- 快手外网引用aar
+- 快手外网引用aar：外网版本仅提供带auth认证的aar
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.7.0" 
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.8.0"
 }
 ```
+
 - 混淆配置
 ```
 -keep class com.kwai.opensdk.sdk.** {*;}
 -keep class com.kwai.opensdk.auth.** {*;}
+
+如果应用需要混淆资源，请将下面文件加入白名单不要混淆防止找不到资源
+/kwai-opensdk/src/main/res/layout/activity_loading.xml
 ```
 
 ## 2、api使用说明、
@@ -166,6 +170,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     ShareMessage.Req req = new ShareMessage.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "sharemessage";
+   // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+   // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+   req.setPlatformArray(new String[] {KwaiConstants.Platform.KWAI_APP, KwaiConstants.Platform.NEBULA_APP});
 
     // business params
     req.message = new KwaiMediaMessage();
@@ -196,6 +203,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     req.openId = mOpenId;
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "sharemessageToBuddy";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.NEBULA_APP, KwaiConstants.Platform.KWAI_APP});
 
     req.targetOpenId = HistoryOpenIdActivity.sTargetOpenId;
     req.message = new KwaiMediaMessage();
@@ -224,7 +234,10 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 
     ShowProfile.Req req = new ShowProfile.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
-    req.transaction = "showProfile_1";
+    req.transaction = "showProfile";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.KWAI_APP});
 
     req.targetOpenId = HistoryOpenIdActivity.sTargetOpenId;
 
@@ -240,6 +253,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     SinglePicturePublish.Req req = new SinglePicturePublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePicturePublish";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.KWAI_APP, KwaiConstants.Platform.NEBULA_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -262,6 +278,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     SinglePictureEdit.Req req = new SinglePictureEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePictureEdit";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.NEBULA_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -284,6 +303,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     SingleVideoPublish.Req req = new SingleVideoPublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoPublish";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.KWAI_APP, KwaiConstants.Platform.NEBULA_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -309,6 +331,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     SingleVideoEdit.Req req = new SingleVideoEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoEdit";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.KWAI_APP, KwaiConstants.Platform.NEBULA_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -333,6 +358,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     SingleVideoClip.Req req = new SingleVideoClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoClip";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.KWAI_APP, KwaiConstants.Platform.NEBULA_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -356,6 +384,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     MultiMediaClip.Req req = new MultiMediaClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "MultiMediaClip";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.NEBULA_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;
@@ -378,6 +409,9 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     AICutMedias.Req req = new AICutMedias.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "AICutMedias";
+    // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
+    // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
+    req.setPlatformArray(new String[] {KwaiConstants.Platform.KWAI_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;

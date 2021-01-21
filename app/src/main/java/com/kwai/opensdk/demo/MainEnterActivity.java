@@ -1,5 +1,6 @@
 package com.kwai.opensdk.demo;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,7 +13,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.kwai.opensdk.sdk.constants.KwaiOpenSdkConstants;
-import com.kwai.opensdk.sdk.utils.VerifyAppUtil;
+import com.kwai.opensdk.sdk.utils.AppPackageUtil;
+import com.kwai.opensdk.sdk.utils.KwaiPlatformUtil;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -23,11 +25,15 @@ public class MainEnterActivity extends FragmentActivity {
     initView();
   }
 
+  @SuppressLint("SetTextI18n")
   private void initView() {
     TextView sdkInfo = findViewById(R.id.sdk_info);
-    //基本信息
+    // 基本信息
     sdkInfo.setText("open sdk version:" + KwaiOpenSdkConstants.SDK_VERSION + "\n" +
-        "快手是否安装:" + VerifyAppUtil.isKwaiAppInstalled(getApplicationContext()));
+        "快手主站是否安装:" + AppPackageUtil.isAppPackageInstalled(getApplicationContext(),
+            KwaiPlatformUtil.KWAI_APP_PACKAGE_NAME) + "\n" +
+        "快手极速版是否安装:" + AppPackageUtil.isAppPackageInstalled(getApplicationContext(),
+            KwaiPlatformUtil.NEBULA_PACKAGE_NAME));
     EditText appIdEditText = findViewById(R.id.app_id);
     appIdEditText.addTextChangedListener(new TextWatcher() {
 

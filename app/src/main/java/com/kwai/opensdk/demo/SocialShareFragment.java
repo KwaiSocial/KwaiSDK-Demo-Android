@@ -1,5 +1,10 @@
 package com.kwai.opensdk.demo;
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+
+import org.json.JSONObject;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -22,22 +27,17 @@ import com.kwai.auth.common.KwaiConstants;
 import com.kwai.opensdk.auth.IKwaiAuthListener;
 import com.kwai.opensdk.auth.IKwaiOpenSdkAuth;
 import com.kwai.opensdk.auth.KwaiOpenSdkAuth;
+import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
+import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
+import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
+import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
+import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
 import com.kwai.opensdk.sdk.model.base.BaseResp;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiMediaMessage;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiWebpageObject;
-import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
-import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
-import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
-import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
-import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.kwai.opensdk.sdk.utils.NetworkUtil;
-
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -82,6 +82,7 @@ public class SocialShareFragment extends Fragment {
 
     view.findViewById(R.id.set_target_openId).setOnClickListener(v -> setTargetOpenId());
 
+    // 快手主站
     mKwaiCheck = view.findViewById(R.id.kwai_app_checkbox);
     mKwaiCheck.setOnCheckedChangeListener((compoundButton, b) -> {
       platformList.clear();
@@ -100,6 +101,7 @@ public class SocialShareFragment extends Fragment {
       refreshLoginText();
     });
 
+    // 快手极速版
     mNebulaCheck = view.findViewById(R.id.nebula_app_checkbox);
     mNebulaCheck.setOnCheckedChangeListener((compoundButton, b) -> {
       platformList.clear();
@@ -146,6 +148,8 @@ public class SocialShareFragment extends Fragment {
     mKwaiOpenSdkAuth = new KwaiOpenSdkAuth();
     // 使用sdk的loading界面，设置false第三方应用可以自定义实现loading
     mKwaiOpenAPI.setShowDefaultLoading(true);
+    // 设置是否使用新的页面栈启动过功能页面
+    mKwaiOpenAPI.setNewTaskFlag(true);
     registerListener();
     // sdk的log设置
     LogUtil.setLogLevel(LogUtil.LOG_LEVEL_ALL);
@@ -276,6 +280,7 @@ public class SocialShareFragment extends Fragment {
     ShareMessage.Req req = new ShareMessage.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "sharemessage";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     // business params
     req.message = new KwaiMediaMessage();
@@ -304,6 +309,7 @@ public class SocialShareFragment extends Fragment {
     req.openId = mOpenId;
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "sharemessageToBuddy";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.targetOpenId = HistoryOpenIdActivity.sTargetOpenId;
     req.message = new KwaiMediaMessage();
@@ -328,7 +334,8 @@ public class SocialShareFragment extends Fragment {
 
     ShowProfile.Req req = new ShowProfile.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
-    req.transaction = "showProfile_1";
+    req.transaction = "showProfile";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.targetOpenId = HistoryOpenIdActivity.sTargetOpenId;
 

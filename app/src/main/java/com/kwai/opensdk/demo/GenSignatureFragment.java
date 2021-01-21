@@ -1,20 +1,23 @@
 package com.kwai.opensdk.demo;
 
+import java.security.MessageDigest;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.security.MessageDigest;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
