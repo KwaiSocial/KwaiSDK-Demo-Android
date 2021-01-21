@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.kwai.auth.common.KwaiConstants;
 import com.kwai.opensdk.sdk.constants.KwaiOpenSdkCmdEnum;
 import com.kwai.opensdk.sdk.model.postshare.AICutMedias;
 import com.kwai.opensdk.sdk.model.postshare.MultiMediaClip;
@@ -73,6 +74,11 @@ public class PostShareFragment extends Fragment {
   private View mMultiSelectPic;
   private TextView mCallbackTv;
 
+  private CheckBox mKwaiCheck;
+  private CheckBox mNebulaCheck;
+  private TextView mLoginPlatform;
+  private final ArrayList<String> platformList = new ArrayList<>(2);
+
   private ArrayList<String> mTags = new ArrayList<>();
   private ArrayList<String> mMultiVideos = new ArrayList<>();
   boolean mIsSelectePicIng = false;
@@ -106,6 +112,7 @@ public class PostShareFragment extends Fragment {
     mDisableFallBack = view.findViewById(R.id.disableFallBack);
     mCallbackTv = view.findViewById(R.id.callback_tips);
     mExtraInfoEdit.setFocusable(true);
+    mLoginPlatform = view.findViewById(R.id.login_platform);
 
     //添加标签 tag
     mTagInput.setOnClickListener(new View.OnClickListener() {
@@ -136,6 +143,44 @@ public class PostShareFragment extends Fragment {
         });
         builder.show();
       }
+    });
+
+    // 快手主站
+    mKwaiCheck = view.findViewById(R.id.kwai_app_checkbox);
+    mKwaiCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      platformList.clear();
+      if (compoundButton.isChecked()) {
+        if (mNebulaCheck.isChecked()) {
+          platformList.add(KwaiConstants.Platform.NEBULA_APP);
+          platformList.add(KwaiConstants.Platform.KWAI_APP);
+        } else {
+          platformList.add(KwaiConstants.Platform.KWAI_APP);
+        }
+      } else {
+        if (mNebulaCheck.isChecked()) {
+          platformList.add(KwaiConstants.Platform.NEBULA_APP);
+        }
+      }
+      refreshLoginText();
+    });
+
+    // 快手极速版
+    mNebulaCheck = view.findViewById(R.id.nebula_app_checkbox);
+    mNebulaCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      platformList.clear();
+      if (compoundButton.isChecked()) {
+        if (mKwaiCheck.isChecked()) {
+          platformList.add(KwaiConstants.Platform.KWAI_APP);
+          platformList.add(KwaiConstants.Platform.NEBULA_APP);
+        } else {
+          platformList.add(KwaiConstants.Platform.NEBULA_APP);
+        }
+      } else {
+        if (mKwaiCheck.isChecked()) {
+          platformList.add(KwaiConstants.Platform.KWAI_APP);
+        }
+      }
+      refreshLoginText();
     });
 
 
@@ -240,10 +285,21 @@ public class PostShareFragment extends Fragment {
     mKwaiOpenAPI.setShowDefaultLoading(false);
     // 设置是否自动跳转应用市场，设置true则自动跳转应用市场下载
     mKwaiOpenAPI.setAutoGotoMarket(true, true);
+    // 设置是否使用新的页面栈启动过功能页面
+    mKwaiOpenAPI.setNewTaskFlag(true);
     registerListener();
     // sdk的log设置
     LogUtil.setLogLevel(LogUtil.LOG_LEVEL_ALL);
     return view;
+  }
+
+  private void refreshLoginText() {
+    StringBuilder buffer = new StringBuilder();
+    for (String platform : platformList) {
+      buffer.append(platform);
+      buffer.append(" ");
+    }
+    mLoginPlatform.setText(buffer.toString());
   }
 
   @Override
@@ -354,6 +410,7 @@ public class PostShareFragment extends Fragment {
     SinglePicturePublish.Req req = new SinglePicturePublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePicturePublish";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -381,6 +438,7 @@ public class PostShareFragment extends Fragment {
     SinglePictureEdit.Req req = new SinglePictureEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePictureEdit";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -408,6 +466,7 @@ public class PostShareFragment extends Fragment {
     SingleVideoPublish.Req req = new SingleVideoPublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoPublish";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -438,6 +497,7 @@ public class PostShareFragment extends Fragment {
     SingleVideoEdit.Req req = new SingleVideoEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoEdit";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -466,6 +526,7 @@ public class PostShareFragment extends Fragment {
     SingleVideoClip.Req req = new SingleVideoClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoClip";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -494,6 +555,7 @@ public class PostShareFragment extends Fragment {
     MultiMediaClip.Req req = new MultiMediaClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "MultiMediaClip";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;
@@ -520,6 +582,7 @@ public class PostShareFragment extends Fragment {
     AICutMedias.Req req = new AICutMedias.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "AICutMedias";
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
 
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;

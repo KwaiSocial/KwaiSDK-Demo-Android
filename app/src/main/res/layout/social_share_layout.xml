@@ -7,16 +7,69 @@
     tools:context=".SocialShareFragment">
 
     <LinearLayout
+      android:id="@+id/login_layout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="20dp"
+      android:gravity="center"
+      android:orientation="vertical"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.498"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:orientation="horizontal">
+
+            <CheckBox
+              android:id="@+id/kwai_app_checkbox"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="5dp"
+              android:text="主站" />
+
+            <CheckBox
+              android:id="@+id/nebula_app_checkbox"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="5dp"
+              android:text="极速版" />
+        </LinearLayout>
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:orientation="horizontal">
+
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="5dp"
+              android:text="平台选择: " />
+
+            <TextView
+              android:id="@+id/login_platform"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="2dp"
+              tools:text="kwai_app;nebula_app" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
       android:id="@+id/app_login_layout"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="20dp"
       android:orientation="horizontal"
-      android:gravity="center_vertical"
+      android:gravity="center"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintHorizontal_bias="0.498"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent">
+      app:layout_constraintTop_toBottomOf="@+id/login_layout">
 
         <Button
           android:id="@+id/login_app_btn"
@@ -34,46 +87,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-      android:id="@+id/login_layout"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="20dp"
-      android:orientation="horizontal"
-      android:gravity="center_vertical"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintHorizontal_bias="0.498"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/app_login_layout">
-
-        <CheckBox
-          android:id="@+id/kwai_app_checkbox"
-          android:text="主站"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginLeft="5dp"/>
-
-        <CheckBox
-          android:id="@+id/nebula_app_checkbox"
-          android:text="极速版"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginLeft="5dp"/>
-
-        <TextView
-          android:text="授权登录: "
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginLeft="5dp" />
-
-        <TextView
-          android:id="@+id/login_platform"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_marginLeft="2dp"
-          tools:text="kwai_app;nebula_app"/>
-    </LinearLayout>
-
     <Button
         android:id="@+id/share"
         android:layout_width="wrap_content"
@@ -87,7 +100,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_layout" />
+        app:layout_constraintTop_toBottomOf="@+id/app_login_layout" />
 
     <Button
         android:id="@+id/shareToBuddy"
