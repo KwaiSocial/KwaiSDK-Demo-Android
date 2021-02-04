@@ -1,10 +1,5 @@
 package com.kwai.opensdk.demo;
 
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-
-import org.json.JSONObject;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -27,17 +22,23 @@ import com.kwai.auth.common.KwaiConstants;
 import com.kwai.opensdk.auth.IKwaiAuthListener;
 import com.kwai.opensdk.auth.IKwaiOpenSdkAuth;
 import com.kwai.opensdk.auth.KwaiOpenSdkAuth;
-import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
-import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
-import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
-import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
-import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
 import com.kwai.opensdk.sdk.model.base.BaseResp;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiMediaMessage;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiWebpageObject;
+import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
+import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
+import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
+import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
+import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
+import com.kwai.opensdk.sdk.openapi.KwaiConfig;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.kwai.opensdk.sdk.utils.NetworkUtil;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -61,6 +62,11 @@ public class SocialShareFragment extends Fragment {
   private CheckBox mNebulaCheck;
   private TextView mLoginPlatform;
   private final ArrayList<String> platformList = new ArrayList<>(2);
+  private CheckBox mNewTaskFlagCheck;
+  private CheckBox mClearTaskFlagCheck;
+  private CheckBox mShowLoadingCheck;
+  private CheckBox mGoMargetAppNotInstallCheck;
+  private CheckBox mGoMargetVersionNotSupportCheck;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -120,6 +126,27 @@ public class SocialShareFragment extends Fragment {
       refreshLoginText();
     });
 
+    mNewTaskFlagCheck = view.findViewById(R.id.new_task_flag);
+    mNewTaskFlagCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mClearTaskFlagCheck = view.findViewById(R.id.clear_task_flag);
+    mClearTaskFlagCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mShowLoadingCheck = view.findViewById(R.id.show_default_loading);
+    mShowLoadingCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mGoMargetAppNotInstallCheck = view.findViewById(R.id.go_marget_app_not_install);
+    mGoMargetAppNotInstallCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mGoMargetVersionNotSupportCheck = view.findViewById(R.id.go_marget_version_not_support);
+    mGoMargetVersionNotSupportCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+
     mOpenIdTv.setOnLongClickListener(new View.OnLongClickListener() {
       @Override
       public boolean onLongClick(View v) {
@@ -146,14 +173,25 @@ public class SocialShareFragment extends Fragment {
       mKwaiOpenAPI = new MockHelper.KwaiOpenAPITest(getContext());
     }
     mKwaiOpenSdkAuth = new KwaiOpenSdkAuth();
-    // 使用sdk的loading界面，设置false第三方应用可以自定义实现loading
-    mKwaiOpenAPI.setShowDefaultLoading(true);
-    // 设置是否使用新的页面栈启动过功能页面
-    mKwaiOpenAPI.setNewTaskFlag(true);
+    setKwaiConfig();
     registerListener();
     // sdk的log设置
     LogUtil.setLogLevel(LogUtil.LOG_LEVEL_ALL);
     return view;
+  }
+
+  private void refreshConfig() {
+    new Handler().postDelayed(() -> setKwaiConfig(), 500);
+  }
+
+  private void setKwaiConfig() {
+    KwaiConfig kwaiConfig = new KwaiConfig.Builder()
+        .setGoToMargetAppNotInstall(mGoMargetAppNotInstallCheck.isChecked())
+        .setGoToMargetAppVersionNotSupport(mGoMargetVersionNotSupportCheck.isChecked())
+        .setSetClearTaskFlag(mClearTaskFlagCheck.isChecked())
+        .setSetNewTaskFlag(mNewTaskFlagCheck.isChecked())
+        .setShowDefaultLoading(mShowLoadingCheck.isChecked()).build();
+    mKwaiOpenAPI.setKwaiConfig(kwaiConfig);
   }
 
   private void refreshLoginText() {
@@ -175,10 +213,10 @@ public class SocialShareFragment extends Fragment {
         if (resp != null) {
           Log.i(TAG, "errorCode=" + resp.errorCode + ", errorMsg="
               + resp.errorMsg + ", cmd=" + resp.getCommand()
-              + ", transaction=" + resp.transaction);
+              + ", transaction=" + resp.transaction + ", platform=" + resp.platform);
           mCallbackTv.setText("CallBackResult: errorCode=" + resp.errorCode + ", errorMsg="
               + resp.errorMsg + ", cmd=" + resp.getCommand()
-              + ", transaction=" + resp.transaction);
+              + ", transaction=" + resp.transaction + ", platform=" + resp.platform);
         } else {
           mCallbackTv.setText("CallBackResult: resp is null");
         }

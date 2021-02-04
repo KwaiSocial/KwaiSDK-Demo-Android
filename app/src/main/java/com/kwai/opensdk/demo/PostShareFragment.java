@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,6 +30,7 @@ import com.kwai.opensdk.sdk.model.postshare.SingleVideoClip;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoEdit;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoPublish;
 import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
+import com.kwai.opensdk.sdk.openapi.KwaiConfig;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.luck.picture.lib.PictureSelector;
@@ -84,6 +86,12 @@ public class PostShareFragment extends Fragment {
   boolean mIsSelectePicIng = false;
 
   private IKwaiOpenAPI mKwaiOpenAPI;
+
+  private CheckBox mNewTaskFlagCheck;
+  private CheckBox mClearTaskFlagCheck;
+  private CheckBox mShowLoadingCheck;
+  private CheckBox mGoMargetAppNotInstallCheck;
+  private CheckBox mGoMargetVersionNotSupportCheck;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -183,6 +191,26 @@ public class PostShareFragment extends Fragment {
       refreshLoginText();
     });
 
+    mNewTaskFlagCheck = view.findViewById(R.id.new_task_flag);
+    mNewTaskFlagCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mClearTaskFlagCheck = view.findViewById(R.id.clear_task_flag);
+    mClearTaskFlagCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mShowLoadingCheck = view.findViewById(R.id.show_default_loading);
+    mShowLoadingCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mGoMargetAppNotInstallCheck = view.findViewById(R.id.go_marget_app_not_install);
+    mGoMargetAppNotInstallCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
+    mGoMargetVersionNotSupportCheck = view.findViewById(R.id.go_marget_version_not_support);
+    mGoMargetVersionNotSupportCheck.setOnCheckedChangeListener((compoundButton, b) -> {
+      refreshConfig();
+    });
 
     //清除tag
     mTagClear.setOnClickListener(new View.OnClickListener() {
@@ -281,16 +309,25 @@ public class PostShareFragment extends Fragment {
     if (MockHelper.isTest) {
       mKwaiOpenAPI = new MockHelper.KwaiOpenAPITest(getContext());
     }
-    // 使用sdk的loading界面，设置false第三方应用可以自定义实现loading
-    mKwaiOpenAPI.setShowDefaultLoading(false);
-    // 设置是否自动跳转应用市场，设置true则自动跳转应用市场下载
-    mKwaiOpenAPI.setAutoGotoMarket(true, true);
-    // 设置是否使用新的页面栈启动过功能页面
-    mKwaiOpenAPI.setNewTaskFlag(true);
+    setKwaiConfig();
     registerListener();
     // sdk的log设置
     LogUtil.setLogLevel(LogUtil.LOG_LEVEL_ALL);
     return view;
+  }
+
+  private void refreshConfig() {
+    new Handler().postDelayed(() -> setKwaiConfig(), 500);
+  }
+
+  private void setKwaiConfig() {
+    KwaiConfig kwaiConfig = new KwaiConfig.Builder()
+        .setGoToMargetAppNotInstall(mGoMargetAppNotInstallCheck.isChecked())
+        .setGoToMargetAppVersionNotSupport(mGoMargetVersionNotSupportCheck.isChecked())
+        .setSetClearTaskFlag(mClearTaskFlagCheck.isChecked())
+        .setSetNewTaskFlag(mNewTaskFlagCheck.isChecked())
+        .setShowDefaultLoading(mShowLoadingCheck.isChecked()).build();
+    mKwaiOpenAPI.setKwaiConfig(kwaiConfig);
   }
 
   private void refreshLoginText() {
@@ -610,10 +647,10 @@ public class PostShareFragment extends Fragment {
       if (resp != null) {
         Log.i(TAG, "errorCode=" + resp.errorCode + ", errorMsg="
           + resp.errorMsg + ", cmd=" + resp.getCommand()
-          + ", transaction=" + resp.transaction);
+          + ", transaction=" + resp.transaction + ", platform=" + resp.platform);
         mCallbackTv.setText("CallBackResult: errorCode=" + resp.errorCode + ", errorMsg="
             + resp.errorMsg + ", cmd=" + resp.getCommand()
-            + ", transaction=" + resp.transaction);
+            + ", transaction=" + resp.transaction + ", platform=" + resp.platform);
       } else {
         mCallbackTv.setText("CallBackResult: resp is null");
       }

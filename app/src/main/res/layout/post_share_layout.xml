@@ -63,6 +63,51 @@
             android:layout_marginLeft="2dp"
             tools:text="kwai_app;nebula_app" />
         </LinearLayout>
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:orientation="horizontal">
+
+          <CheckBox
+            android:id="@+id/new_task_flag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="newTaskFlag" />
+
+          <CheckBox
+            android:id="@+id/clear_task_flag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="clearTaskFlag" />
+          <CheckBox
+            android:id="@+id/show_default_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="showLoading" />
+        </LinearLayout>
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:orientation="horizontal">
+          <CheckBox
+            android:id="@+id/go_marget_app_not_install"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="goMargetAppNotInstall" />
+
+          <CheckBox
+            android:id="@+id/go_marget_version_not_support"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="goMargetVersionNotSupport" />
+        </LinearLayout>
       </LinearLayout>
 
       <LinearLayout

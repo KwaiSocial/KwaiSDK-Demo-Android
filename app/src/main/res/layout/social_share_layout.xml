@@ -1,181 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".SocialShareFragment">
+<ScrollView
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".SocialShareFragment">
 
-    <LinearLayout
-      android:id="@+id/login_layout"
+    <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="20dp"
-      android:gravity="center"
-      android:orientation="vertical"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintHorizontal_bias="0.498"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent">
+      android:layout_height="match_parent">
 
         <LinearLayout
-          android:layout_width="wrap_content"
+          android:id="@+id/login_layout"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
+          android:layout_marginTop="20dp"
           android:gravity="center"
-          android:orientation="horizontal">
+          android:orientation="vertical"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintHorizontal_bias="0.498"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent">
 
-            <CheckBox
-              android:id="@+id/kwai_app_checkbox"
+            <LinearLayout
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginLeft="5dp"
-              android:text="主站" />
+              android:gravity="center"
+              android:orientation="horizontal">
 
-            <CheckBox
-              android:id="@+id/nebula_app_checkbox"
+                <CheckBox
+                  android:id="@+id/kwai_app_checkbox"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="主站" />
+
+                <CheckBox
+                  android:id="@+id/nebula_app_checkbox"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="极速版" />
+            </LinearLayout>
+
+            <LinearLayout
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginLeft="5dp"
-              android:text="极速版" />
+              android:gravity="center"
+              android:orientation="horizontal">
+
+                <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="平台选择: " />
+
+                <TextView
+                  android:id="@+id/login_platform"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="2dp"
+                  tools:text="kwai_app;nebula_app" />
+            </LinearLayout>
+            <LinearLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:orientation="horizontal">
+
+                <CheckBox
+                  android:id="@+id/new_task_flag"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="newTaskFlag" />
+
+                <CheckBox
+                  android:id="@+id/clear_task_flag"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="clearTaskFlag" />
+                <CheckBox
+                  android:id="@+id/show_default_loading"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="showLoading" />
+            </LinearLayout>
+            <LinearLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:orientation="horizontal">
+                <CheckBox
+                  android:id="@+id/go_marget_app_not_install"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="goMargetAppNotInstall" />
+
+                <CheckBox
+                  android:id="@+id/go_marget_version_not_support"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="5dp"
+                  android:text="goMargetVersionNotSupport" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
-          android:layout_width="wrap_content"
+          android:id="@+id/app_login_layout"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
+          android:layout_marginTop="20dp"
+          android:orientation="horizontal"
           android:gravity="center"
-          android:orientation="horizontal">
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/login_layout">
 
-            <TextView
+            <Button
+              android:id="@+id/login_app_btn"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginLeft="5dp"
-              android:text="平台选择: " />
+              android:layout_marginLeft="20dp"
+              android:text="app登录快手" />
 
-            <TextView
-              android:id="@+id/login_platform"
+            <Button
+              android:id="@+id/login_h5_btn"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginLeft="2dp"
-              tools:text="kwai_app;nebula_app" />
+              android:layout_marginLeft="20dp"
+              android:text="h5登录快手" />
+
         </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-      android:id="@+id/app_login_layout"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="20dp"
-      android:orientation="horizontal"
-      android:gravity="center"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/login_layout">
 
         <Button
-          android:id="@+id/login_app_btn"
+          android:id="@+id/share"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_marginLeft="20dp"
-          android:text="app登录快手" />
+          android:layout_marginStart="8dp"
+          android:layout_marginLeft="8dp"
+          android:layout_marginTop="30dp"
+          android:layout_marginEnd="8dp"
+          android:layout_marginRight="8dp"
+          android:text="分享私信"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintHorizontal_bias="0.498"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/app_login_layout" />
 
         <Button
-          android:id="@+id/login_h5_btn"
+          android:id="@+id/shareToBuddy"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_marginLeft="20dp"
-          android:text="h5登录快手" />
+          android:layout_marginStart="8dp"
+          android:layout_marginLeft="8dp"
+          android:layout_marginTop="30dp"
+          android:layout_marginEnd="8dp"
+          android:layout_marginRight="8dp"
+          android:text="分享私信到人"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintHorizontal_bias="0.498"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/share" />
 
-    </LinearLayout>
+        <Button
+          android:id="@+id/show_profile"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="8dp"
+          android:layout_marginLeft="8dp"
+          android:layout_marginTop="30dp"
+          android:layout_marginEnd="8dp"
+          android:layout_marginRight="8dp"
+          android:text="打开名片"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintHorizontal_bias="0.498"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/shareToBuddy" />
 
-    <Button
-        android:id="@+id/share"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="分享私信"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/app_login_layout" />
+        <Button
+          android:id="@+id/set_target_openId"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="8dp"
+          android:layout_marginLeft="8dp"
+          android:layout_marginTop="30dp"
+          android:layout_marginEnd="8dp"
+          android:layout_marginRight="8dp"
+          android:text="设置target openId"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintHorizontal_bias="0.498"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/show_profile" />
 
-    <Button
-        android:id="@+id/shareToBuddy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="分享私信到人"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/share" />
+        <TextView
+          android:id="@+id/open_id"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="30dp"
+          android:paddingLeft="15dp"
+          android:paddingRight="15dp"
+          android:text="点击app登录！"
+          android:textSize="17dp"
+          android:textStyle="bold"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintHorizontal_bias="0.498"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/set_target_openId" />
 
-    <Button
-        android:id="@+id/show_profile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="打开名片"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/shareToBuddy" />
+        <TextView
+          android:id="@+id/callback_tips"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="30dp"
+          android:paddingLeft="15dp"
+          android:paddingRight="15dp"
+          android:textSize="17dp"
+          android:textStyle="bold"
+          android:text="callback result"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintHorizontal_bias="0.498"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/open_id" />
 
-    <Button
-        android:id="@+id/set_target_openId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="设置target openId"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/show_profile" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/open_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:text="点击app登录！"
-        android:textSize="17dp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/set_target_openId" />
-
-    <TextView
-        android:id="@+id/callback_tips"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:textSize="17dp"
-        android:textStyle="bold"
-        android:text="callback result"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/open_id" />
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

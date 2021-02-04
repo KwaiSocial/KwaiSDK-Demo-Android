@@ -15,7 +15,7 @@
 访问git库：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
 
 # 三、第三方接入说明
-## 1、接入aar（AAR Latest Version 2.8.0）
+## 1、接入aar（AAR Latest Version 2.9.0）
 
 - 版本要求  minsdkversion:19
 
@@ -23,7 +23,7 @@
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.8.0"
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.9.0"
 }
 ```
 
@@ -137,8 +137,15 @@ IKwaiAuthListener kwaiAuthListener = new IKwaiAuthListener() {
 private IKwaiOpenAPI mKwaiOpenAPI; // 声明使用接口
 mKwaiOpenAPI = new KwaiOpenAPI(getContext()); // 初始化
 
-// 使用sdk提供的loading界面，设置false第三方应用可以自定义实现loading
-mKwaiOpenAPI.setShowDefaultLoading(true);
+// 设置平台功能的配置选项
+KwaiConfig kwaiConfig = new KwaiConfig.Builder()
+        .setGoToMargetAppNotInstall(true) // 应用未安装，是否自动跳转应用市场
+        .setGoToMargetAppVersionNotSupport(true) // 应用已安装但版本不支持，是否自动跳转应用市场
+        .setSetNewTaskFlag(true) // 设置启动功能页面是否使用新的页面栈
+        .setSetClearTaskFlag(true) // 设置启动功能页面是否清除当前页面栈，当isSetNewTaskFlag为true时生效
+        .setShowDefaultLoading(false) // 是否显示默认的loading页面作为功能启动的过渡
+        .build();
+mKwaiOpenAPI.setKwaiConfig(kwaiConfig);
 
 // 业务请求回调结果监听
 mKwaiOpenAPI.addKwaiAPIEventListerer(new IKwaiAPIEventListener() {
@@ -149,10 +156,10 @@ mKwaiOpenAPI.addKwaiAPIEventListerer(new IKwaiAPIEventListener() {
     if (resp != null) {
       Log.i(TAG, "errorCode=" + resp.errorCode + ", errorMsg="
           + resp.errorMsg + ", cmd=" + resp.getCommand()
-          + ", transaction=" + resp.transaction);
+          + ", transaction=" + resp.transaction + ", platform=" + resp.platform);
       mCallbackTv.setText("CallBackResult: errorCode=" + resp.errorCode + ", errorMsg="
           + resp.errorMsg + ", cmd=" + resp.getCommand()
-          + ", transaction=" + resp.transaction);
+          + ", transaction=" + resp.transaction + ", platform=" + resp.platform);
     } else {
       mCallbackTv.setText("CallBackResult: resp is null");
     }
