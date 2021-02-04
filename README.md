@@ -139,12 +139,12 @@ mKwaiOpenAPI = new KwaiOpenAPI(getContext()); // 初始化
 
 // 设置平台功能的配置选项
 KwaiConfig kwaiConfig = new KwaiConfig.Builder()
-        .setGoToMargetAppNotInstall(true) // 应用未安装，是否自动跳转应用市场
-        .setGoToMargetAppVersionNotSupport(true) // 应用已安装但版本不支持，是否自动跳转应用市场
-        .setSetNewTaskFlag(true) // 设置启动功能页面是否使用新的页面栈
-        .setSetClearTaskFlag(true) // 设置启动功能页面是否清除当前页面栈，当isSetNewTaskFlag为true时生效
-        .setShowDefaultLoading(false) // 是否显示默认的loading页面作为功能启动的过渡
-        .build();
+  .setGoToMargetAppNotInstall(true) // 应用未安装，是否自动跳转应用市场
+  .setGoToMargetAppVersionNotSupport(true) // 应用已安装但版本不支持，是否自动跳转应用市场
+  .setSetNewTaskFlag(true) // 设置启动功能页面是否使用新的页面栈
+  .setSetClearTaskFlag(true) // 设置启动功能页面是否清除当前页面栈，当isSetNewTaskFlag为true时生效
+  .setShowDefaultLoading(false) // 是否显示默认的loading页面作为功能启动的过渡
+  .build();
 mKwaiOpenAPI.setKwaiConfig(kwaiConfig);
 
 // 业务请求回调结果监听
