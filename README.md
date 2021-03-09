@@ -15,15 +15,15 @@
 访问git库：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
 
 # 三、第三方接入说明
-## 1、接入aar（AAR Latest Version 2.9.0）
+## 1、接入aar（AAR Latest Version 2.10.0）
 
-- 版本要求  minsdkversion:19
+- 版本要求 minsdkversion:19
 
 - 快手外网引用aar：外网版本仅提供带auth认证的aar
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.9.0"
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.10.0"
 }
 ```
 
@@ -66,7 +66,7 @@ public class MyApplication extends Application {
 ```
 
 ```
-private IKwaiOpenSdkAuth mKwaiOpenSdkAuth = new KwaiOpenSdkAuth(); // 初始化
+private IKwaiOpenSdkAuth mKwaiOpenSdkAuth = new KwaiOpenSdkAuth(); // 初始化
 // 设置授权结果监听
 IKwaiAuthListener kwaiAuthListener = new IKwaiAuthListener() {
     @Override
@@ -138,14 +138,14 @@ private IKwaiOpenAPI mKwaiOpenAPI; // 声明使用接口
 mKwaiOpenAPI = new KwaiOpenAPI(getContext()); // 初始化
 
 // 设置平台功能的配置选项
-KwaiConfig kwaiConfig = new KwaiConfig.Builder()
+OpenSdkConfig openSdkConfig = new OpenSdkConfig.Builder()
   .setGoToMargetAppNotInstall(true) // 应用未安装，是否自动跳转应用市场
   .setGoToMargetAppVersionNotSupport(true) // 应用已安装但版本不支持，是否自动跳转应用市场
   .setSetNewTaskFlag(true) // 设置启动功能页面是否使用新的页面栈
   .setSetClearTaskFlag(true) // 设置启动功能页面是否清除当前页面栈，当isSetNewTaskFlag为true时生效
   .setShowDefaultLoading(false) // 是否显示默认的loading页面作为功能启动的过渡
   .build();
-mKwaiOpenAPI.setKwaiConfig(kwaiConfig);
+mKwaiOpenAPI.setKwaiConfig(openSdkConfig);
 
 // 业务请求回调结果监听
 mKwaiOpenAPI.addKwaiAPIEventListerer(new IKwaiAPIEventListener() {
@@ -477,5 +477,7 @@ public interface KwaiOpenSdkErrorCode {
    * 100200111, // 用户未授权过
    */
   int ERR_SERVER_CHECK_INVALID_PARAMETER  = 100200100; //SERVER端检查发现无效的参数
+  
+  int PUBLISH_WORK_SUCCESS = 100; //作品发布到快手上传成功通知，需要使用快手9.2.20及以后版本
 }
 ```

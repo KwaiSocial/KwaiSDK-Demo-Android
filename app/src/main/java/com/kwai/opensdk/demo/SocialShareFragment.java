@@ -23,6 +23,7 @@ import com.kwai.opensdk.auth.IKwaiAuthListener;
 import com.kwai.opensdk.auth.IKwaiOpenSdkAuth;
 import com.kwai.opensdk.auth.KwaiOpenSdkAuth;
 import com.kwai.opensdk.sdk.model.base.BaseResp;
+import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiMediaMessage;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiWebpageObject;
 import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
@@ -30,7 +31,6 @@ import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
 import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
 import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
 import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
-import com.kwai.opensdk.sdk.openapi.KwaiConfig;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.kwai.opensdk.sdk.utils.NetworkUtil;
@@ -185,13 +185,13 @@ public class SocialShareFragment extends Fragment {
   }
 
   private void setKwaiConfig() {
-    KwaiConfig kwaiConfig = new KwaiConfig.Builder()
+    OpenSdkConfig openSdkConfig = new OpenSdkConfig.Builder()
         .setGoToMargetAppNotInstall(mGoMargetAppNotInstallCheck.isChecked())
         .setGoToMargetAppVersionNotSupport(mGoMargetVersionNotSupportCheck.isChecked())
         .setSetClearTaskFlag(mClearTaskFlagCheck.isChecked())
         .setSetNewTaskFlag(mNewTaskFlagCheck.isChecked())
         .setShowDefaultLoading(mShowLoadingCheck.isChecked()).build();
-    mKwaiOpenAPI.setKwaiConfig(kwaiConfig);
+    mKwaiOpenAPI.setKwaiConfig(openSdkConfig);
   }
 
   private void refreshLoginText() {
