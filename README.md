@@ -12,31 +12,69 @@
 准备工作
 开发者需要在快手开放平台完成注册，新建一个网站应用，并获取应用标识appId 和 appSecret，详细参考申请注册流程，官网地址：https://open.kuaishou.com/platform
 
-访问git库：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
+外网访问git库：https://github.com/KwaiSocial/KwaiSDK-Demo-Android
+
+快手内网访问git库：http://git.corp.kuaishou.com/android/open_sdk_social
 
 # 三、第三方接入说明
-## 1、接入aar（AAR Latest Version 2.10.0）
+## 1、接入aar
 
 - 版本要求 minsdkversion:19
 
-- 快手外网引用aar：外网版本仅提供带auth认证的aar
+- 快手外网引用aar：外网版本仅提供带auth认证的aar(当前最新版本：3.0.2)
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:2.10.0"
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:3.0.2"
 }
 ```
 
+- 快手内网引用aar:
+
+  配置maven库
+```
+allprojects {
+    repositories {
+	maven {
+           url "http://nexus.corp.kuaishou.com:88/nexus/content/repositories/releases/" }
+    }
+}
+```
+
+仅使用auth认证的依赖，支持快手登录认证获取openId(当前最新版本：3.0.0)
+```
+dependencies {
+   // 版本号请设置最新的版本
+   implementation "com.kwai.opensdk.sdk:kwai-auth:3.0.0"
+}
+
+```
+不带auth认证的依赖，需要第三方应用自行获取openId并且已经登录快手(当前最新版本：3.0.1)
+```
+dependencies {
+   // 版本号请设置最新的版本
+   implementation "com.kwai.opensdk.sdk:kwai-opensdk:3.0.1"
+}
+
+```
+合并上面两个依赖库，带有auth认证逻辑的依赖，可以通过提供的接口操作登录并获取openId(当前最新版本：3.0.2)
+```
+dependencies {
+   // 版本号请设置最新的版本
+   implementation "com.kwai.opensdk.sdk:kwai-opensdk-withauth:3.0.2"
+}
+```
 - 混淆配置
 ```
 -keep class com.kwai.opensdk.sdk.** {*;}
--keep class com.kwai.opensdk.auth.** {*;}
+-keep class com.kwai.auth.** {*;}
 
-如果应用需要混淆资源，请将下面文件加入白名单不要混淆防止找不到资源
+如果第三方应用需要混淆资源，请将下面文件加入白名单不要混淆防止找不到资源
 /kwai-opensdk/src/main/res/layout/activity_loading.xml
+/kwai-auth/src/main/res/layout/activity_kwai_login_h5.xml
 ```
 
-## 2、api使用说明、
+## 2、api使用说明
 ### （1）应用配置
 接入方应用需要在build.gradle中配置如下信息（必须）
 ```
@@ -45,7 +83,7 @@ android {
         applicationId "com.kwai.chat.demo" // 接入方的包名
         manifestPlaceholders = [
             "KWAI_APP_ID": "ks703687443040312600", // 申请分配的appId
-            "KWAI_SCOPE" : "user_info" // 需要申请的scope权限，多个scope可以使用","分割，代表需要用户授权什么能力
+            "KWAI_SCOPE" : "user_info" // 账号授权需要申请的scope权限，多个scope可以使用","分割，代表需要用户授权什么能力
         ]
     }
 }
@@ -60,17 +98,15 @@ public class MyApplication extends Application {
   @Override
   public void onCreate() {
     super.onCreate();
-    KwaiOpenSdkAuth.init(this);
+    KwaiAuthAPI.init(this);
   }
 }
 ```
 
 ```
-private IKwaiOpenSdkAuth mKwaiOpenSdkAuth = new KwaiOpenSdkAuth(); // 初始化
-// 设置授权结果监听
-IKwaiAuthListener kwaiAuthListener = new IKwaiAuthListener() {
+final ILoginListener loginListener = new ILoginListener() { // 登录回调的监听
     @Override
-    public void onSuccess(InternalResponse response) {
+    public void onSuccess(@NonNull InternalResponse response) {
       new Thread(new Runnable() {
         public void run() {
           String result = null;
@@ -107,13 +143,19 @@ IKwaiAuthListener kwaiAuthListener = new IKwaiAuthListener() {
       mOpenIdTv.setText("login is canceled");
     }
   };
-}
 // STATE安全参数，标识和用户或者设备相关的授权请求。建议开发者实现
 // KwaiConstants.LoginType.APP通过快手App登录授权，KwaiConstants.LoginType.H5通过H5页面登录授权
 // 请求授权，支持两个平台KwaiConstants.Platform.KWAI_APP（快手主站）、KwaiConstants.Platform.NEBULA_APP（快手极速版），未设置的默认通过快手主站授权
-  mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.STATE,
-    KwaiConstants.LoginType.APP,kwaiAuthListener, new String[]
-      {KwaiConstants.Platform.KWAI_APP，KwaiConstants.Platform.NEBULA_APP});
+// 设置了两个平台且同时安装了快手主站和快手极速版，则按传入顺序调起
+// KwaiConstants.LoginType.APP使用快手应用授权，KwaiConstants.LoginType.H5使用前端页面通过手机号和验证码授权
+  KwaiAuthRequest request = new KwaiAuthRequest.Builder()
+    .setState(Config.STATE)
+    .setAuthMode(KwaiConstants.AuthMode.AUTHORIZE)
+    .setLoginType(KwaiConstants.LoginType.APP)
+    .setPlatformArray(platformList.toArray(new String[]
+      {KwaiConstants.Platform.KWAI_APP，KwaiConstants.Platform.NEBULA_APP}))
+    .build();
+  KwaiAuthAPI.getInstance().sendRequest(getActivity(), request, loginListener);
 
   // 服务器使用接口，获取openId的网络请求，为了安全性，建议放在第三方客户端的服务器中，由接入方服务器实现这个请求接口后将openid返回接入方的客户端
   private String getOpenIdByNetwork(final String code) {
@@ -138,14 +180,14 @@ private IKwaiOpenAPI mKwaiOpenAPI; // 声明使用接口
 mKwaiOpenAPI = new KwaiOpenAPI(getContext()); // 初始化
 
 // 设置平台功能的配置选项
-OpenSdkConfig openSdkConfig = new OpenSdkConfig.Builder()
-  .setGoToMargetAppNotInstall(true) // 应用未安装，是否自动跳转应用市场
-  .setGoToMargetAppVersionNotSupport(true) // 应用已安装但版本不支持，是否自动跳转应用市场
-  .setSetNewTaskFlag(true) // 设置启动功能页面是否使用新的页面栈
-  .setSetClearTaskFlag(true) // 设置启动功能页面是否清除当前页面栈，当isSetNewTaskFlag为true时生效
-  .setShowDefaultLoading(false) // 是否显示默认的loading页面作为功能启动的过渡
-  .build();
-mKwaiOpenAPI.setKwaiConfig(openSdkConfig);
+ OpenSdkConfig openSdkConfig = new OpenSdkConfig.Builder()
+        .setGoToMargetAppNotInstall(true) // 应用未安装，是否自动跳转应用市场
+        .setGoToMargetAppVersionNotSupport(true) // 应用已安装但版本不支持，是否自动跳转应用市场
+        .setSetNewTaskFlag(true) // 设置启动功能页面是否使用新的页面栈
+        .setSetClearTaskFlag(true) // 设置启动功能页面是否清除当前页面栈，当isSetNewTaskFlag为true时生效
+        .setShowDefaultLoading(false) // 是否显示默认的loading页面作为功能启动的过渡
+        .build();
+mKwaiOpenAPI.setOpenSdkConfig(openSdkConfig);
 
 // 业务请求回调结果监听
 mKwaiOpenAPI.addKwaiAPIEventListerer(new IKwaiAPIEventListener() {
@@ -312,7 +354,7 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     req.transaction = "SingleVideoPublish";
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
-    req.setPlatformArray(new String[] {KwaiPlatform.Platform.KWAI_APP, KwaiPlatform.Platform.NEBULA_APP});
+    req.setPlatformArray(new String[] {KwaiPlatform.Platform.KWAI_APP,KwaiPlatform.Platform.NEBULA_APP});
 
     req.mediaInfo = new PostShareMediaInfo();
     ArrayList<String> imageFile = new ArrayList<>();
@@ -478,6 +520,7 @@ public interface KwaiOpenSdkErrorCode {
    */
   int ERR_SERVER_CHECK_INVALID_PARAMETER  = 100200100; //SERVER端检查发现无效的参数
   
-  int PUBLISH_WORK_SUCCESS = 100; //作品发布到快手上传成功通知，需要使用快手9.2.20及以后版本
+  // 作品发布到快手上传成功通知
+  int PUBLISH_WORK_SUCCESS = 100;
 }
 ```

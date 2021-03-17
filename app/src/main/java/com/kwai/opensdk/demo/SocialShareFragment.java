@@ -1,5 +1,10 @@
 package com.kwai.opensdk.demo;
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+
+import org.json.JSONObject;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -17,28 +22,23 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kwai.auth.ILoginListener;
+import com.kwai.auth.KwaiAuthAPI;
 import com.kwai.auth.common.InternalResponse;
 import com.kwai.auth.common.KwaiConstants;
-import com.kwai.opensdk.auth.IKwaiAuthListener;
-import com.kwai.opensdk.auth.IKwaiOpenSdkAuth;
-import com.kwai.opensdk.auth.KwaiOpenSdkAuth;
-import com.kwai.opensdk.sdk.model.base.BaseResp;
-import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
-import com.kwai.opensdk.sdk.model.socialshare.KwaiMediaMessage;
-import com.kwai.opensdk.sdk.model.socialshare.KwaiWebpageObject;
+import com.kwai.auth.login.kwailogin.KwaiAuthRequest;
 import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
-import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
-import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
 import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
 import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
+import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
+import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
+import com.kwai.opensdk.sdk.model.base.BaseResp;
+import com.kwai.opensdk.sdk.model.socialshare.KwaiMediaMessage;
+import com.kwai.opensdk.sdk.model.socialshare.KwaiWebpageObject;
+import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.kwai.opensdk.sdk.utils.NetworkUtil;
-
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -57,7 +57,6 @@ public class SocialShareFragment extends Fragment {
   private TextView mOpenIdTv;
   private TextView mCallbackTv;
   private IKwaiOpenAPI mKwaiOpenAPI;
-  private IKwaiOpenSdkAuth mKwaiOpenSdkAuth;
   private CheckBox mKwaiCheck;
   private CheckBox mNebulaCheck;
   private TextView mLoginPlatform;
@@ -172,7 +171,6 @@ public class SocialShareFragment extends Fragment {
     if (MockHelper.isTest) {
       mKwaiOpenAPI = new MockHelper.KwaiOpenAPITest(getContext());
     }
-    mKwaiOpenSdkAuth = new KwaiOpenSdkAuth();
     setKwaiConfig();
     registerListener();
     // sdk的log设置
@@ -191,7 +189,7 @@ public class SocialShareFragment extends Fragment {
         .setSetClearTaskFlag(mClearTaskFlagCheck.isChecked())
         .setSetNewTaskFlag(mNewTaskFlagCheck.isChecked())
         .setShowDefaultLoading(mShowLoadingCheck.isChecked()).build();
-    mKwaiOpenAPI.setKwaiConfig(openSdkConfig);
+    mKwaiOpenAPI.setOpenSdkConfig(openSdkConfig);
   }
 
   private void refreshLoginText() {
@@ -257,10 +255,9 @@ public class SocialShareFragment extends Fragment {
     return builder.toString();
   }
   
-  final IKwaiAuthListener mKwaiAuthListener = new IKwaiAuthListener() {
-
+  final ILoginListener loginListener = new ILoginListener() {
     @Override
-    public void onSuccess(InternalResponse response) {
+    public void onSuccess(@NonNull InternalResponse response) {
       new Thread(new Runnable() {
         public void run() {
           String result = null;
@@ -300,16 +297,24 @@ public class SocialShareFragment extends Fragment {
   
   // app调起登录
   public void appLogin() {
-    mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.STATE,
-        KwaiConstants.LoginType.APP, mKwaiAuthListener,
-        platformList.toArray(new String[platformList.size()]));
+    KwaiAuthRequest request = new KwaiAuthRequest.Builder()
+        .setState(Config.STATE)
+        .setAuthMode(KwaiConstants.AuthMode.AUTHORIZE)
+        .setLoginType(KwaiConstants.LoginType.APP)
+        .setPlatformArray(platformList.toArray(new String[platformList.size()]))
+        .build();
+    KwaiAuthAPI.getInstance().sendRequest(getActivity(), request, loginListener);
   }
   
   // h5调起登录
   public void h5Login() {
-    mKwaiOpenSdkAuth.sendAuthReqToKwai(getActivity(), Config.STATE,
-        KwaiConstants.LoginType.H5, mKwaiAuthListener,
-        platformList.toArray(new String[platformList.size()]));
+    KwaiAuthRequest request = new KwaiAuthRequest.Builder()
+        .setState(Config.STATE)
+        .setAuthMode(KwaiConstants.AuthMode.AUTHORIZE)
+        .setLoginType(KwaiConstants.LoginType.H5)
+        .setPlatformArray(platformList.toArray(new String[platformList.size()]))
+        .build();
+    KwaiAuthAPI.getInstance().sendRequest(getActivity(), request, loginListener);
   }
 
   // 通过选择人或者群组分享私信

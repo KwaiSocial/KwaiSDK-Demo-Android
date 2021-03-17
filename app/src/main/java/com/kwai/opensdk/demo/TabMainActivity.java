@@ -1,5 +1,8 @@
 package com.kwai.opensdk.demo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -7,9 +10,6 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;

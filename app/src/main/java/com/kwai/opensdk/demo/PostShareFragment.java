@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.kwai.auth.common.KwaiConstants;
 import com.kwai.opensdk.sdk.constants.KwaiOpenSdkCmdEnum;
-import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
 import com.kwai.opensdk.sdk.model.postshare.AICutMedias;
 import com.kwai.opensdk.sdk.model.postshare.MultiMediaClip;
 import com.kwai.opensdk.sdk.model.postshare.PostShareMediaInfo;
@@ -31,6 +30,7 @@ import com.kwai.opensdk.sdk.model.postshare.SingleVideoClip;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoEdit;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoPublish;
 import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
+import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.luck.picture.lib.PictureSelector;
@@ -327,7 +327,7 @@ public class PostShareFragment extends Fragment {
         .setSetClearTaskFlag(mClearTaskFlagCheck.isChecked())
         .setSetNewTaskFlag(mNewTaskFlagCheck.isChecked())
         .setShowDefaultLoading(mShowLoadingCheck.isChecked()).build();
-    mKwaiOpenAPI.setKwaiConfig(openSdkConfig);
+    mKwaiOpenAPI.setOpenSdkConfig(openSdkConfig);
   }
 
   private void refreshLoginText() {
