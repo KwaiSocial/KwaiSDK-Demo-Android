@@ -1,10 +1,5 @@
 package com.kwai.opensdk.demo;
 
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-
-import org.json.JSONObject;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -27,18 +22,23 @@ import com.kwai.auth.KwaiAuthAPI;
 import com.kwai.auth.common.InternalResponse;
 import com.kwai.auth.common.KwaiConstants;
 import com.kwai.auth.login.kwailogin.KwaiAuthRequest;
-import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
-import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
-import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
-import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
-import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
 import com.kwai.opensdk.sdk.model.base.BaseResp;
+import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiMediaMessage;
 import com.kwai.opensdk.sdk.model.socialshare.KwaiWebpageObject;
-import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
+import com.kwai.opensdk.sdk.model.socialshare.ShareMessage;
+import com.kwai.opensdk.sdk.model.socialshare.ShareMessageToBuddy;
+import com.kwai.opensdk.sdk.model.socialshare.ShowProfile;
+import com.kwai.opensdk.sdk.openapi.IKwaiAPIEventListener;
+import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.kwai.opensdk.sdk.utils.NetworkUtil;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;

@@ -1,8 +1,7 @@
 package com.kwai.opensdk.demo;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -11,6 +10,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager.widget.ViewPager;
@@ -45,6 +48,7 @@ public class TabMainActivity extends FragmentActivity {
     mViewPager.setAdapter(mAdapter);
     mViewPager.addOnPageChangeListener(new TabOnPageChangeListener());
     initTabLine();
+    verifyStoragePermissions(this);
   }
 
   private void initTabLine() {
@@ -128,4 +132,21 @@ public class TabMainActivity extends FragmentActivity {
       }
     }
   }
+
+  private static final String[] PERMISSIONS_STORAGE = {
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE"};
+
+  private void verifyStoragePermissions(Activity activity) {
+    try {
+      int permission = ActivityCompat.checkSelfPermission(activity,
+          "android.permission.WRITE_EXTERNAL_STORAGE");
+      if (permission != PackageManager.PERMISSION_GRANTED) {
+        ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, 1);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
 }

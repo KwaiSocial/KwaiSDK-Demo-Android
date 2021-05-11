@@ -1,5 +1,6 @@
 package com.kwai.opensdk.demo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 
 import com.kwai.auth.common.KwaiConstants;
 import com.kwai.opensdk.sdk.constants.KwaiOpenSdkCmdEnum;
+import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
 import com.kwai.opensdk.sdk.model.postshare.AICutMedias;
 import com.kwai.opensdk.sdk.model.postshare.MultiMediaClip;
 import com.kwai.opensdk.sdk.model.postshare.PostShareMediaInfo;
@@ -30,7 +32,6 @@ import com.kwai.opensdk.sdk.model.postshare.SingleVideoClip;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoEdit;
 import com.kwai.opensdk.sdk.model.postshare.SingleVideoPublish;
 import com.kwai.opensdk.sdk.openapi.IKwaiOpenAPI;
-import com.kwai.opensdk.sdk.model.base.OpenSdkConfig;
 import com.kwai.opensdk.sdk.openapi.KwaiOpenAPI;
 import com.kwai.opensdk.sdk.utils.LogUtil;
 import com.luck.picture.lib.PictureSelector;
@@ -44,6 +45,9 @@ import java.util.List;
 import java.util.Map;
 
 import androidx.fragment.app.Fragment;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class PostShareFragment extends Fragment {
   private static final String TAG = "PostShareFragment";
@@ -92,6 +96,7 @@ public class PostShareFragment extends Fragment {
   private CheckBox mShowLoadingCheck;
   private CheckBox mGoMargetAppNotInstallCheck;
   private CheckBox mGoMargetVersionNotSupportCheck;
+  private CheckBox mUseAppPrivateFileCheck;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -211,6 +216,7 @@ public class PostShareFragment extends Fragment {
     mGoMargetVersionNotSupportCheck.setOnCheckedChangeListener((compoundButton, b) -> {
       refreshConfig();
     });
+    mUseAppPrivateFileCheck = view.findViewById(R.id.use_app_private_file);
 
     //清除tag
     mTagClear.setOnClickListener(new View.OnClickListener() {
@@ -339,50 +345,17 @@ public class PostShareFragment extends Fragment {
     mLoginPlatform.setText(buffer.toString());
   }
 
+  @SuppressLint("CheckResult")
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     mIsSelectePicIng = false;
     if (resultCode == Activity.RESULT_OK) {
-      if (requestCode == REQUEST_CODE_IMAGE) {
-        Uri uri = data.getData();//从图片的Uri是以cotent://格式开头的
-        //获取到图片
-        try {
-          File file = new File(parseFilePath(getActivity(), uri));
-          //mPicPath.setText(file.getAbsolutePath());
-          KwaiOpenSdkCmdEnum cmd = getPicShareCmd(mPicSpinnerSharePage.getSelectedItemPosition());
-          if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_PICTURE_PUBLISH)) {
-            publishPicture(file);
-          } else if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_PICTURE_EDIT)) {
-            editPicture(file);
-          }
-
-        } catch (Exception e) {
-          Log.e("testData", e.getMessage());
-        }
-      } else if (requestCode == REQUEST_CODE_SINGLE_VIDEO_COVER) {
-        Uri uri = data.getData();//从图片的Uri是以cotent://格式开头的
+      if (requestCode == REQUEST_CODE_SINGLE_VIDEO_COVER) {
+        Uri uri = data.getData(); //从图片的Uri是以cotent://格式开头的
         //获取到图片
         File file = new File(parseFilePath(getActivity(), uri));
         mSingleVideocoverPath.setText(file.getAbsolutePath());
-      } else if (requestCode == REQUEST_CODE_SINGLE_VIDEO) {
-        Uri uri = data.getData();//从图片的Uri是以cotent://格式开头的
-        //获取到图片
-        try {
-          File file = new File(parseFilePath(getActivity(), uri));
-          //mSingleVideoPath.setText(file.getAbsolutePath());
-          KwaiOpenSdkCmdEnum cmd = getVideoShareCmd(mSpinnerSharePage.getSelectedItemPosition());
-          if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_VIDEO_PUBLISH)) {
-            publishSingleVideo(file);
-          } else if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_VIDEO_EDIT)) {
-            editSingleVideo(file);
-          } else if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_VIDEO_CLIP)) {
-            clipSingleVideo(file);
-          }
-
-        } catch (Exception e) {
-          Log.e("testData", e.getMessage());
-        }
       } else if (requestCode == REQUEST_CODE_MULTI_VIDEO) {
         List<LocalMedia> selectList = PictureSelector.obtainMultipleResult(data);
         if (selectList != null) {
@@ -395,7 +368,63 @@ public class PostShareFragment extends Fragment {
           }
         }
         mMultiVideoPath.setText("已选视频或图片数量:" + mMultiVideos.size());
+      } else {
+        Observable.fromCallable(() -> {
+          Uri fileUri = data.getData(); // 从图片的Uri是以cotent://格式开头的
+          File albumFile = new File(parseFilePath(getActivity(), fileUri));
+          // copy分享文件到应用私有目录下
+          if (mUseAppPrivateFileCheck.isChecked()) {
+            File privateFile = FileProviderUtil.copyFileToShareDir(getActivity(), albumFile);
+            if (privateFile != null && privateFile.exists()) {
+              return new ShareParam(albumFile, privateFile, true);
+            }
+          }
+          return new ShareParam(albumFile, null, false);
+        }).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(result -> {
+              if (requestCode == REQUEST_CODE_IMAGE) {
+                try {
+                  KwaiOpenSdkCmdEnum cmd =
+                      getPicShareCmd(mPicSpinnerSharePage.getSelectedItemPosition());
+                  if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_PICTURE_PUBLISH)) {
+                    publishPicture(result);
+                  } else if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_PICTURE_EDIT)) {
+                    editPicture(result);
+                  }
+                } catch (Exception e) {
+                  Log.e(TAG, e.getMessage());
+                }
+              } else if (requestCode == REQUEST_CODE_SINGLE_VIDEO) {
+                try {
+                  KwaiOpenSdkCmdEnum cmd =
+                      getVideoShareCmd(mSpinnerSharePage.getSelectedItemPosition());
+                  if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_VIDEO_PUBLISH)) {
+                    publishSingleVideo(result);
+                  } else if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_VIDEO_EDIT)) {
+                    editSingleVideo(result);
+                  } else if (cmd.equals(KwaiOpenSdkCmdEnum.CMD_SINGLE_VIDEO_CLIP)) {
+                    clipSingleVideo(result);
+                  }
+                } catch (Exception e) {
+                  Log.e(TAG, e.getMessage());
+                }
+              }
+            }, throwable -> {
+              Log.e(TAG, throwable.getMessage());
+            });
       }
+    }
+  }
+
+  class ShareParam {
+    public File albumFile;
+    public File privateFile;
+    public boolean isUserPrivateFile;
+    public ShareParam(File albumFile, File privateFile, boolean isUserPrivateFile) {
+      this.albumFile = albumFile;
+      this.privateFile = privateFile;
+      this.isUserPrivateFile = isUserPrivateFile;
     }
   }
 
@@ -421,7 +450,7 @@ public class PostShareFragment extends Fragment {
         cursor.close();
       }
     }
-    return picturePath;
+     return picturePath;
   }
 
   private KwaiOpenSdkCmdEnum getPicShareCmd(int position) {
@@ -443,16 +472,25 @@ public class PostShareFragment extends Fragment {
   }
 
   //发布图片
-  public void publishPicture(File file) {
+  public void publishPicture(ShareParam param) {
     SinglePicturePublish.Req req = new SinglePicturePublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePicturePublish";
     req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
-
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
+    ArrayList<String> imageFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    imageFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = imageFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -471,16 +509,25 @@ public class PostShareFragment extends Fragment {
   }
 
   //编辑图片
-  public void editPicture(File file) {
+  public void editPicture(ShareParam param) {
     SinglePictureEdit.Req req = new SinglePictureEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePictureEdit";
     req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
-
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
+    ArrayList<String> imageFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    imageFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = imageFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -499,16 +546,25 @@ public class PostShareFragment extends Fragment {
   }
 
   //发布单个视频
-  public void publishSingleVideo(File file) {
+  public void publishSingleVideo(ShareParam param) {
     SingleVideoPublish.Req req = new SingleVideoPublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoPublish";
     req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
-
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
+    ArrayList<String> videoFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    videoFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = videoFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mSingleVideocoverPath.getText())) {
       req.mCover = mSingleVideocoverPath.getText().toString();
     }
@@ -530,17 +586,25 @@ public class PostShareFragment extends Fragment {
   }
 
   //编辑单个视频
-  public void editSingleVideo(File file) {
+  public void editSingleVideo(ShareParam param) {
     SingleVideoEdit.Req req = new SingleVideoEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoEdit";
     req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
-
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
-
+    ArrayList<String> videoFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    videoFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = videoFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -559,17 +623,25 @@ public class PostShareFragment extends Fragment {
   }
 
   //裁剪单个视频
-  public void clipSingleVideo(File file) {
+  public void clipSingleVideo(ShareParam param) {
     SingleVideoClip.Req req = new SingleVideoClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoClip";
     req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
-
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
-
+    ArrayList<String> videoFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    videoFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = videoFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -587,16 +659,15 @@ public class PostShareFragment extends Fragment {
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
 
-  //clipMultiMedia
+  // 多图和视频裁剪
   public void clipMultiMedia(ArrayList<String> multiMedia) {
     MultiMediaClip.Req req = new MultiMediaClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "MultiMediaClip";
     req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
-
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;
-
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -614,16 +685,15 @@ public class PostShareFragment extends Fragment {
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
 
-  //aiCutMedias
+  // 智能剪辑的api使用
   public void aiCutMedias(ArrayList<String> multiMedia) {
     AICutMedias.Req req = new AICutMedias.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "AICutMedias";
     req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
-
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;
-
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -674,5 +744,11 @@ public class PostShareFragment extends Fragment {
       e.printStackTrace();
     }
     return mediaMap;
+  }
+
+  private void printShareFilePath(ArrayList<String> pathList) {
+    for (String item : pathList) {
+      Log.d(TAG, "path is " + item);
+    }
   }
 }

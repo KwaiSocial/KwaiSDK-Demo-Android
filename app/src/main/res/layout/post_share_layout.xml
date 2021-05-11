@@ -108,6 +108,17 @@
             android:layout_marginLeft="5dp"
             android:text="goMargetVersionNotSupport" />
         </LinearLayout>
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center"
+          android:orientation="horizontal">
+          <CheckBox
+            android:id="@+id/use_app_private_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="useAppPrivateFile" />
+        </LinearLayout>
       </LinearLayout>
 
       <LinearLayout

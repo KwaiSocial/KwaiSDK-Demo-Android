@@ -10,6 +10,11 @@
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="com.yxcorp.gifshow.thirdparty.auth.read" />
 
+  <queries>
+    <package android:name="com.smile.gifmaker"/>
+    <package android:name="com.kuaishou.nebula"/>
+  </queries>
+
   <application
     android:name=".MyApplication"
     android:allowBackup="true"
@@ -34,6 +39,16 @@
     <activity android:name="com.kwai.opensdk.demo.HistoryOpenIdActivity"
         android:screenOrientation="portrait">
     </activity>
+
+    <provider
+      android:name="androidx.core.content.FileProvider"
+      android:authorities="${applicationId}.fileprovider"
+      android:exported="false"
+      android:grantUriPermissions="true" >
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" />
+    </provider>
 
   </application>
 

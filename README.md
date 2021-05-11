@@ -21,11 +21,11 @@
 
 - 版本要求 minsdkversion:19
 
-- 快手外网引用aar：外网版本仅提供带auth认证的aar(当前最新版本：3.0.2)
+- 快手外网引用aar：外网版本仅提供带auth认证的aar(当前最新版本：3.0.3)
 ```
 dependencies {
    // 版本号建议设置成最新的版本
-   implementation "com.github.kwaisocial:kwai-opensdk-withauth:3.0.2"
+   implementation "com.github.kwaisocial:kwai-opensdk-withauth:3.0.3"
 }
 ```
 
@@ -49,19 +49,19 @@ dependencies {
 }
 
 ```
-不带auth认证的依赖，需要第三方应用自行获取openId并且已经登录快手(当前最新版本：3.0.1)
+不带auth认证的依赖，需要第三方应用自行获取openId并且已经登录快手(当前最新版本：3.0.2)
 ```
 dependencies {
    // 版本号请设置最新的版本
-   implementation "com.kwai.opensdk.sdk:kwai-opensdk:3.0.1"
+   implementation "com.kwai.opensdk.sdk:kwai-opensdk:3.0.2"
 }
 
 ```
-合并上面两个依赖库，带有auth认证逻辑的依赖，可以通过提供的接口操作登录并获取openId(当前最新版本：3.0.2)
+合并上面两个依赖库，带有auth认证逻辑的依赖，可以通过提供的接口操作登录并获取openId(当前最新版本：3.0.3)
 ```
 dependencies {
    // 版本号请设置最新的版本
-   implementation "com.kwai.opensdk.sdk:kwai-opensdk-withauth:3.0.2"
+   implementation "com.kwai.opensdk.sdk:kwai-opensdk-withauth:3.0.3"
 }
 ```
 - 混淆配置
@@ -296,26 +296,46 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 ### （5）生产方向相关的业务请求示例代码：
 - 生产方向的操作具有权限控制，请在demo中查询接入方是否获取了对应操作的权限
 - 设置封面时需要封面图与视频大小保持一致
+- req.mediaInfo中的传入的分享文件mMultiMediaAssets支持传递fileAbsolutePath、fileUri和contentUri三种方式(建议优先使用fileAbsolutePath)；
+  若使用Uri传递分享文件需要保证快手app的版本支持，请使用接口isAppSupportUri(Context context, BaseReq req)来判断快手版本是否支持Uri做为参数；
+  若分享文件在三方应用私有目录内请保证授权快手访问该文件的权限；
+  若使用fileUri和contentUri作为参数传递，快手开放平台版本要求至少升级到3.0.3及以上
 ```
 //发布图片
-  public void publishPicture(File file) {
+  public void publishPicture(ShareParam param) {
     SinglePicturePublish.Req req = new SinglePicturePublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePicturePublish";
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
-    req.setPlatformArray(new String[] {KwaiPlatform.Platform.KWAI_APP, KwaiPlatform.Platform.NEBULA_APP});
-
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
+    ArrayList<String> imageFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    imageFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = imageFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -323,18 +343,26 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 
 ```
 //编辑图片
-  public void editPicture(File file) {
+  public void editPicture(ShareParam param) {
     SinglePictureEdit.Req req = new SinglePictureEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SinglePictureEdit";
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
     req.setPlatformArray(new String[] {KwaiPlatform.Platform.NEBULA_APP});
-
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
+    ArrayList<String> imageFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    imageFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = imageFiles;
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -348,18 +376,27 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 
 ```
 //发布单个视频
-  public void publishSingleVideo(File file) {
+  public void publishSingleVideo(ShareParam param) {
     SingleVideoPublish.Req req = new SingleVideoPublish.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoPublish";
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
-    req.setPlatformArray(new String[] {KwaiPlatform.Platform.KWAI_APP,KwaiPlatform.Platform.NEBULA_APP});
-
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
+    ArrayList<String> videoFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    videoFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = videoFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mSingleVideocoverPath.getText())) {
       req.mCover = mSingleVideocoverPath.getText().toString();
     }
@@ -367,8 +404,15 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -376,25 +420,40 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 
 ```
 //编辑单个视频
-  public void editSingleVideo(File file) {
+  public void editSingleVideo(ShareParam param) {
     SingleVideoEdit.Req req = new SingleVideoEdit.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoEdit";
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
-    req.setPlatformArray(new String[] {KwaiPlatform.Platform.KWAI_APP, KwaiPlatform.Platform.NEBULA_APP});
-
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
-
+    ArrayList<String> videoFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    videoFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = videoFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -403,25 +462,40 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
 
 ```
 //裁剪单个视频
-  public void clipSingleVideo(File file) {
+  public void clipSingleVideo(ShareParam param) {
     SingleVideoClip.Req req = new SingleVideoClip.Req();
     req.sessionId = mKwaiOpenAPI.getOpenAPISessionId();
     req.transaction = "SingleVideoClip";
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
-    req.setPlatformArray(new String[] {KwaiPlatform.Platform.KWAI_APP, KwaiPlatform.Platform.NEBULA_APP});
-
+    req.setPlatformArray(platformList.toArray(new String[platformList.size()]));
     req.mediaInfo = new PostShareMediaInfo();
-    ArrayList<String> imageFile = new ArrayList<>();
-    imageFile.add(file.getAbsolutePath());
-    req.mediaInfo.mMultiMediaAssets = imageFile;
-
+    ArrayList<String> videoFiles = new ArrayList<>();
+    String filePath = param.albumFile.getAbsolutePath();
+    if (param.isUserPrivateFile && param.privateFile != null && param.privateFile.exists()) {
+      // 获取私有文件目录下的分享文件uri
+      String fileUriPath = FileProviderUtil.generateFileUriPath(getActivity(), param.privateFile, req,
+          mKwaiOpenAPI);
+      if (!TextUtils.isEmpty(fileUriPath)) {
+        filePath = fileUriPath;
+      }
+    }
+    videoFiles.add(filePath);
+    req.mediaInfo.mMultiMediaAssets = videoFiles;
+    printShareFilePath(req.mediaInfo.mMultiMediaAssets);
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
     req.mediaInfo.mDisableFallback = mDisableFallBack.isChecked();
-    if (!TextUtils.isEmpty(mExtraEdit.getText().toString())) {
-      req.mediaInfo.mExtraInfo = mExtraEdit.getText().toString();
+    if (!TextUtils.isEmpty(mExtraInfoEdit.getText().toString())) {
+      req.mediaInfo.mExtraInfo = mExtraInfoEdit.getText().toString();
+    }
+    if (!TextUtils.isEmpty(mThirdExtraEdit.getText().toString())) {
+      req.thirdExtraInfo = mThirdExtraEdit.getText().toString();
+    }
+    Map<String, Object> mediaInfoMap = getMediaMap();
+    if (mediaInfoMap != null && !mediaInfoMap.isEmpty()) {
+      req.mediaInfo.mMediaInfoMap =  mediaInfoMap;
     }
     mKwaiOpenAPI.sendReq(req, getActivity());
   }
@@ -436,10 +510,7 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
     req.setPlatformArray(new String[] {KwaiPlatform.Platform.NEBULA_APP});
-
-    req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;
-
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -461,10 +532,8 @@ mKwaiOpenAPI.removeKwaiAPIEventListerer();
     // 设置功能调起快手支持应用，KwaiPlatform.Platform.KWAI_APP（快手主站），KwaiPlatform.Platform.NEBULA_APP（快手极速版）
     // 按数组顺序检查应用安装和版本情况，从中选择满足条件的第一个应用调起，若不设置则默认启动快手主站应用
     req.setPlatformArray(new String[] {KwaiPlatform.Platform.KWAI_APP});
-
     req.mediaInfo = new PostShareMediaInfo();
     req.mediaInfo.mMultiMediaAssets = multiMedia;
-
     if (!TextUtils.isEmpty(mTagList.getText().toString())) {
       req.mediaInfo.mTag = mTagList.getText().toString();
     }
@@ -524,3 +593,27 @@ public interface KwaiOpenSdkErrorCode {
   int PUBLISH_WORK_SUCCESS = 100;
 }
 ```
+
+## 4、Android版本适配
+
+### （1）Android11的软件包可见性
+Android11加强了隐私保护策略，引入了大量变更和限制，其中一个重要变更 —— [软件包可见性](https://developer.android.com/about/versions/11/privacy/package-visibility "软件包可见性")，
+此更改将会导致检查是否安装快手app失败，从而无法正确调起开放平台功能。
+特别需要注意的是，Android11的该变更只会影响到升级 targetSdkVersion=30 的应用，未升级的应用暂不受影响。
+
+- 根据Android官方给出的适配方案，在主工程的AndroidManifest.xml 中增加 <queries> 标签，即可解决以上影响，代码如下：
+
+```
+<manifest package="com.kwai.opensdk.demo">
+  // 在应用的AndroidManifest.xml添加如下<queries>标签
+   <queries>
+    <package android:name="com.smile.gifmaker"/>  // 快手主站
+    <package android:name="com.kuaishou.nebula"/> // 快手极速版
+  </queries>
+</manifest>
+
+```
+- 添加以上标签之后，需要开发者升级编译工具，否则会出现编译错误：
+  Android Studio 需要升级至 3.3 及以上，建议升级至 4.0 及以上版本
+  Android SDK Build-Tools 需要升级至 30.0.0 及以上版本
+  com.android.tools.build:gradle 需要升级至 3.6.0 版本及以上，建议升级至最新版本
